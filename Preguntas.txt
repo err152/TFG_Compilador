@@ -1,0 +1,5 @@
+- Vamos a realizar la implementación completa? O solo hasta cierto punto?
+--- Single-pass o tree-walk?
+--- Como funciona la compilación JIT?
+- Traducciones de algunos términos
+-
