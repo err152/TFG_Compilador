@@ -123,3 +123,100 @@ Un intérprete además de traducir el lenguaje lo ejecuta.
 
 ## 3. El lenguaje Lox
 
+```c
+// Your first Lox program!
+print "Hello, world!";
+```
+
+Lox se escribe dinámicamente. Las variables pueden almacenar valores de cualquier tipo, o incluso una variable puede almacenar varios datos de distinto tipo.
+
+A la hora de gestionar la memoria de forma automática tenemos dos opciones: '**reference counting**' o **tracing garbage collection**'. En nuestro caso utilizaremos el garbage collection ya que reference counting tiene varias limitaciones.
+
+Como tipos de datos tenemos:
+
+- **Booleans**: 'true' y 'false'.
+- **Números**: flotantes de doble precision. '1234' o '12.34'.
+- **Strings**: "I am a string".
+- **Nil**: representa un valor nulo. 'nil'.
+
+Expresiones:
+
+- **Aritméticas**: sólo aplicables a números
+     - Operaciones binarias: x+y, x-y, x*y, x/y
+     - Operaciones no binarias: -x
+
+- **Comparación e igualdad**:
+
+  - Comparación: x<y, x<=y, x>y, x>=y (solo números) 
+
+  - Igualdad: x == y, "x" != "y", x == "y"
+
+    
+
+- **Operadores Lógicos**: ! , and, or+
+
+- **Precedencia y agrupación**: la precedencia es la misma a lenguajes como C o Java, si se quiere modificar se puede utilizar () .
+
+Sentencias:
+
+Terminadas en ; tienen como objetivo devolver un valor.
+
+Si se desea empaquetar una serie de sentencias en una sola se pueden rodear de {} afectando al scoping.
+
+```c
+{
+print "One statement.";
+print "Two statements.";
+}
+```
+
+Variables:
+
+Las variables se declaran utilizando sentencias var, si no se inicializan de forma predeterminada valen nil.
+
+```c
+var imAVariable = "here is my value";
+var iAmNil;
+var breakfast = "bagels";
+print breakfast; // "bagels".
+breakfast = "beignets";
+print breakfast; // "beignets".
+```
+
+Control de Flujo:
+
+```c
+if (condition) {
+print "yes";
+} else {
+print "no";
+}
+```
+
+```c
+var a = 1;
+while (a < 10) {
+print a;
+a = a + 1;
+}
+```
+
+```c
+for (var a = 1; a < 10; a = a + 1) {
+print a;
+}
+```
+
+Funciones:
+
+Se definen funciones con fun
+
+```c
+makeBreakfast(bacon, eggs, toast);
+makeBreakfast();
+
+fun printSum(a, b) {
+print a + b;
+}
+```
+
