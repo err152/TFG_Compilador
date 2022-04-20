@@ -174,7 +174,7 @@ Variables:
 
 Las variables se declaran utilizando sentencias var, si no se inicializan de forma predeterminada valen nil.
 
-```c
+```c++
 var imAVariable = "here is my value";
 var iAmNil;
 var breakfast = "bagels";
@@ -211,7 +211,7 @@ Funciones:
 
 Se definen funciones con fun
 
-```c
+```c++
 makeBreakfast(bacon, eggs, toast);
 makeBreakfast();
 
@@ -220,3 +220,255 @@ print a + b;
 }
 ```
 
+Clausuras:
+
+```c++
+fun identity(a) {
+return a;
+}
+print identity(addPair)(1, 2); // Prints "3".
+```
+
+Clases:
+
+Por que un lenguaje orientado a objetos? La mayoría del código que circula por internet actualmente es en algún lenguaje orientado a objetos y esto se debe a que puede ser bastante útil a la hora de definir tipos de datos complejos. Además de esta forma nuestro intérprete se podría considerar 'más completo'.
+
+```c++
+class Breakfast {
+	cook() {
+		print "Eggs a-fryin'!";
+	}
+	serve(who) {
+		print "Enjoy your breakfast, " + who + ".";
+	}
+}
+```
+
+Instancias e inicialización:
+
+Lox permite añadir propiedades a los objetos de forma libre:
+
+```c++
+breakfast.meat = "sausage";
+breakfast.bread = "sourdough";
+```
+
+Y para acceder a estas propiedades desde dentro de un método utiliza el *this* de toda la vida:
+
+```c++
+class Breakfast {
+	serve(who) {
+		print "Enjoy your " + this.meat + " and " +
+		this.bread + ", " + who + ".";
+	}
+	// ...
+}
+```
+
+Herencia:
+
+Herencia singular mediante el operador '<'
+
+```c++
+class Brunch < Breakfast {
+	drink() {
+		print "How about a Bloody Mary?";
+	}
+}
+
+var benedict = Brunch("ham", "English muffin");
+benedict.serve("Noble Reader");
+```
+
+Al igual que en java para el método init utilizamos super :
+
+```c++
+class Brunch < Breakfast {
+	init(meat, bread, drink) {
+		super.init(meat, bread);
+		this.drink = drink;
+	}
+}
+```
+
+------
+
+
+
+## 4. Scanning
+
+Este es el primer paso de cualquier intérprete. El scanner toma un código fuente como una serie de caracteres y los agrupa en lo que llamamos **lexemas**, los cuales tratados como información de un tipo concreto y en un contexto se convierten en **tokens**.
+
+Se definen 3 tipos de token: IDENTIFICADOR, NUMERO, STRING
+
+Además de palabras clave como operadores lógicos, funciones internas, o caracteres especiales.
+
+Todos ellos son definidos en el fichero de nombre 'TokenType.py' de la siguiente manera:
+
+```python
+class Token:
+    def __init__(self, linea, tipo, valor):
+        self.linea = linea
+        self.tipo = tipo
+        self.valor = valor
+        
+    def __repr__(self):
+        return f'[{self.linea},"{self.tipo}",{self.valor}]'
+
+class TokenType(Enum):
+    # Single-character tokens
+    LEFT_PAREN = '('
+    RIGHT_PAREN = ')'
+    LEFT_BRACE = '{'
+    RIGHT_BRACE = '}'
+    COMMA = ','
+    DOT = '.'
+    MINUS = '-'
+    PLUS = '+'
+    SEMICOLON = ';'
+    SLASH = '/'
+    STAR = '*'
+
+    # One or two+ character tokens
+    BANG = '!'
+    BANG_EQUAL = '!='
+    EQUAL = '='
+    EQUAL_EQUAL = '=='
+    GREATER = '>'
+    GREATER_EQUAL = '>='
+    LESS = '<'
+    LESS_EQUAL = '<='
+
+    # Literales
+    IDENTIFIER = 'identifier'
+    NUMBER = 'num'
+    STRING = 'str'
+
+    # Keywords
+    AND = 'and'
+    CLASS = 'class'
+    ELSE = 'else'
+    FALSE = 'false'
+    FUN = 'fun'
+    FOR = 'for'
+    IF = 'if'
+    NIL = 'nil'
+    OR = 'or'
+    PRINT = 'print'
+    RETURN = 'return'
+    SUPER = 'super'
+    THIS = 'this'
+    TRUE = 'true'
+    VAR = 'var'
+    WHILE = 'while'
+
+    # end-of-file
+    EOF = ''
+
+_keywords: Tuple[str] = (
+    'true','false','nil','and','or','if','else','fun','return','for','class',
+    'super','this','while','print'
+    )
+
+KEYWORDS: Dict[str,TokenType] = {key: TokenType(key) for key in _keywords}
+
+SINGLE_CHARS: Tuple[str] = (
+    '(', ')', '{', '}', ',', '.', '-', '+', ';', '*',
+)
+
+MULTI_CHARS: Tuple[str] = ('!', '!=', '=', '==', '>', '>=', '<', '<=')
+```
+
+Los tokens se componen de un número de linea, el tipo al que pertenecen y un valor dentro del tipo. Se definen todos los caracteres posibles bajo su nombre de tipo para poder utilizarlos a gusto en le resto del código.
+
+Una vez definidos, ahora dada una cadena de caracteres debemos desarrollar un programa **lexer.py** que lea caracter a caracter y vaya identificando los distintos tipos de tokens según avance.
+
+```python
+from Token import (Token,TokenType,KEYWORDS,SINGLE_CHARS,
+                   MULTI_CHARS)
+
+class Lexer:
+    def __init__(self, entrada):
+        self.entrada = entrada
+        self.pos = 0
+        self.linea = 0
+        self.inicio = 0
+
+    def token_actual(self):
+        return self.entrada[self.inicio:self.pos]
+
+    def devolver_tokens(self):
+        estado = "inicial"
+        while self.pos < len(self.entrada):
+            caracter = self.entrada[self.pos]
+            mid = self.token_actual()
+            print("----- ",self.inicio," : ",estado," : ",caracter," : ",mid," : ",self.pos)
+            nuevo_estado = self.transicion(estado,caracter,mid)
+            if nuevo_estado == 'ERROR':
+                if estado != 'ESPACIO':
+                    yield Token(self.linea,estado,self.token_actual())
+                self.inicio = self.pos
+                estado = 'inicial'
+                
+            elif nuevo_estado == 'ESPACIO':
+                if estado not in ('inicial','ERROR','ESPACIO'):
+                    yield Token(self.linea,estado,self.token_actual())
+                self.inicio = self.pos
+                self.pos += 1
+                estado = nuevo_estado
+                
+            else:
+                self.pos += 1
+                estado = nuevo_estado
+                
+        if estado not in ('inicial','ERROR','ESPACIO'):
+            yield Token(self.linea,estado,self.token_actual())
+
+    def transicion(self,estado,caracter,mid):
+        if estado == 'inicial' and caracter in SINGLE_CHARS: # BIEN
+            return TokenType(caracter).name
+
+        elif estado == 'inicial' and caracter in MULTI_CHARS: # BIEN
+            self.pos += 1
+            mid = self.entrada[self.inicio:self.pos+1]
+            if mid in MULTI_CHARS:
+                return TokenType(mid).name
+            self.pos -= 1
+            mid = self.token_actual()
+            return TokenType(caracter).name
+
+        elif estado not in ('STRING') and (caracter.isspace()
+                                           or caracter == '\n'): # BIEN
+            if caracter == '\n':
+                self.linea += 1
+            return 'ESPACIO'
+
+        elif estado == 'inicial' and (caracter == '"' or caracter == "'"):
+            print("Entro STRING")
+            self.consume_str(caracter)
+
+        elif estado in ('NUMERO','inicial') and caracter.isdigit():
+            #self.consume_num()
+            return 'NUMERO'
+
+        elif estado in  ('IDENTIFICADOR','inicial') and caracter.isalnum() or caracter == '_':
+            #self.consume_id()
+            return 'IDENTIFICADOR'
+
+        else:
+            return 'ERROR'
+
+    def consume_str(self,caracter):
+        while self.entrada[pos] != caracter and self.pos < len(self.entrada):
+            if self.entrada[pos] == '\n':
+                self.linea += 1
+            self.pos += 1
+            print("----- ",self.pos)
+            
+        self.pos +=1
+        texto = self.entrada[(self.inicio+1):(self.pos-1)]
+        print(texto)
+        yield Token(self.linea,TokenType.STRING,texto)
+```
+
+Este programa cuenta unos atributos llamados pos, inicio y linea que respectivamente indican la posición actual dentro de la cadena de caracteres, el inicio del token actualmente en proceso, y el número de linea actual. Se avanza caracter a caracter aumentando pos hasta reconocer que ha terminado el token, devolviendo los caracteres del inicio hasta la posicion actual, junto a la linea (que también irá aumentando según se lea el caracter \n).
