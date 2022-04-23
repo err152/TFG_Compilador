@@ -19,7 +19,7 @@ class Lexer:
             print("----- ",self.inicio," : ",estado," : ",caracter," : ",mid," : ",self.pos)
             nuevo_estado = self.transicion(estado,caracter,mid)
             if nuevo_estado == 'ERROR':
-                if estado != 'ESPACIO':
+                if estado not in ('ESPACIO','NUMERO_'):
                     yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 estado = 'inicial'
@@ -51,43 +51,61 @@ class Lexer:
             mid = self.token_actual()
             return TokenType(caracter).name
 
-        elif estado not in ('STRING') and (caracter.isspace()
+        elif estado not in ('STRING_','NUMERO_','IDENTIFICADOR') and (caracter.isspace()
                                            or caracter == '\n'): # BIEN
             if caracter == '\n':
                 self.linea += 1
             return 'ESPACIO'
 
         elif estado == 'inicial' and (caracter == '"' or caracter == "'"):
-            print("Entro STRING")
-            self.consume_str(caracter)
+            return 'STRING_'
+            
+        elif estado == 'STRING_':
+            if caracter == '"' or caracter == "'":
+                return 'STRING'
+            elif caracter != '"' or caracter != "'":
+                return 'STRING_'
 
-        elif estado in ('NUMERO','inicial') and caracter.isdigit():
-            #self.consume_num()
+        elif estado == 'inicial' and caracter.isdigit():
             return 'NUMERO'
 
+        elif estado == 'NUMERO':
+            if caracter.isdigit():
+                return 'NUMERO'
+            elif caracter == '.':
+                return 'NUMERO_'
+            
+        elif estado == 'NUMERO_':
+            if caracter.isdigit():
+                return 'NUMERO'
+            else:
+                return 'ERROR'
+
         elif estado in  ('IDENTIFICADOR','inicial') and caracter.isalnum() or caracter == '_':
-            #self.consume_id()
+            midd = self.entrada[self.inicio:self.pos+1]
+            if midd in KEYWORDS:
+                return TokenType(midd).name
+            
             return 'IDENTIFICADOR'
 
         else:
             return 'ERROR'
 
-    def consume_str(self,caracter):
-        while self.entrada[pos] != caracter and self.pos < len(self.entrada):
-            if self.entrada[pos] == '\n':
-                self.linea += 1
-            self.pos += 1
-            print("----- ",self.pos)
-            
-        self.pos +=1
-        texto = self.entrada[(self.inicio+1):(self.pos-1)]
-        print(texto)
-        yield Token(self.linea,TokenType.STRING,texto)
             
 if __name__ == '__main__':
     #analizador = Lexer("aAA  \n ass 34")
-    #analizador= Lexer("> == *- 34")
-    analizador= Lexer("string 'Hola mundo'")
+    #analizador = Lexer("> == *- 34")
+    #analizador = Lexer("string 'Hola mundo' Sinbad el 'marino' soy")
+    #analizador = Lexer(" '' ' ' ")
+    #analizador = Lexer(" 2 2345 2.356 2. ")
+    #analizador = Lexer('''class Brunch < Breakfast {
+    #   init(meat, bread, drink) {
+    #       super.init(meat, bread);
+    #       this.drink = drink;
+    #       }
+    #   }''')
+    #analizador = Lexer(" true false and adn burrito")
+    
     for i in analizador.devolver_tokens():
         print(i)
         
