@@ -16,10 +16,10 @@ class Lexer:
         while self.pos < len(self.entrada):
             caracter = self.entrada[self.pos]
             mid = self.token_actual()
-            print("----- ",self.inicio," : ",estado," : ",caracter," : ",mid," : ",self.pos)
+            #print("----- ",self.inicio," : ",estado," : ",caracter," : ",mid," : ",self.pos)
             nuevo_estado = self.transicion(estado,caracter,mid)
             if nuevo_estado == 'ERROR':
-                if estado not in ('ESPACIO','NUMERO_'):
+                if estado not in ('ESPACIO','NUMERO_','COMMENT_'):
                     yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 estado = 'inicial'
@@ -35,7 +35,7 @@ class Lexer:
                 self.pos += 1
                 estado = nuevo_estado
                 
-        if estado not in ('inicial','ERROR','ESPACIO'):
+        if estado not in ('inicial','ERROR','ESPACIO','COMMENT_'):
             yield Token(self.linea,estado,self.token_actual())
 
     def transicion(self,estado,caracter,mid):
@@ -50,6 +50,20 @@ class Lexer:
             self.pos -= 1
             mid = self.token_actual()
             return TokenType(caracter).name
+
+        elif estado == 'inicial' and caracter == '/':
+            self.pos += 1
+            midd = self.entrada[self.inicio:self.pos+1]
+            if midd == '//':
+                return 'COMMENT_'
+            self.pos -= 1
+
+        elif estado == 'COMMENT_':
+            if caracter == '\n':
+                self.linea += 1
+                return 'inicial'
+            else:
+                return 'COMMENT_'
 
         elif estado not in ('STRING_','NUMERO_','IDENTIFICADOR') and (caracter.isspace()
                                            or caracter == '\n'): # BIEN
@@ -105,6 +119,7 @@ if __name__ == '__main__':
     #       }
     #   }''')
     #analizador = Lexer(" true false and adn burrito")
+    analizador = Lexer(" a si //Esto es un comentario \n Holaa")
     
     for i in analizador.devolver_tokens():
         print(i)

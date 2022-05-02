@@ -33,6 +33,7 @@ class TokenType(Enum):
     GREATER_EQUAL = '>='
     LESS = '<'
     LESS_EQUAL = '<='
+    COMMENT = '//'
 
     # Literales
     IDENTIFIER = 'identifier'

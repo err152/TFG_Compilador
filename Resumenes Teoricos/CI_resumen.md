@@ -504,3 +504,43 @@ if __name__ == '__main__':
 ```
 
 En el mismo fichero tenemos esta función main para probar nuestro scanner con distintas entradas para comprobar que cubrimos todos los casos posibles.
+
+
+
+## 5. Representando el código
+
+A la hora de definir el lenguaje de forma sintáctica tendremos que crear una gramática libre de contexto o **CFG**, mediante la cual definiendo reglas o **producciones** se abarcará todo el lenguaje sin definir implícitamente cada punto y coma.
+
+Estas producciones tiene la forma:
+
+A → Bc ;
+
+Donde A es la **cabeza** y esta se transforma en el **cuerpo** Bc siendo B una **variable** y c un **terminal**. Los terminales serán tokens que vienen del lexer, y se llaman así porque son un punto final, estos no pueden derivar mediante producciones. Por otro lado, las variables o no-terminales hacen referencia a otras producciones de la gramática.
+
+En nuestra notación también se utilizarán los siguientes simbolos:
+
+- A → b | c | d ;	Funcionando el símbolo '|' como un OR.
+- A → (b | c) d ;    Los paréntesis dan prioridad de elección al grupo que rodean.
+- A → B B* ;    El símbolo '*' indica que la variable a la que sigue se puede repetir entre 0 e infinitas veces. De esta forma logramos recursión.
+- A → B+ ;    El símbolo '*' indica que la variable a la que sigue se puede repetir entre 1 e infinitas veces. De esta forma logramos recursión.
+- A → b (C d E)? ;    Indicando '?' que el grupo o variable al que acompaña aparece una o ninguna vez, es opcional.
+
+En nuestra gramática para el lenguaje Lox se definen de comienzo las siguientes expresiones:
+
+- Literales: numeros, strings, booleanos, nil.
+- Expresiones Unarias: el prefijo "!" para realizar un NOT lógico o "-" para negar un número.
+- Expresiones Binarias: los operadores aritméticos y lógicos que conocemos.
+- Paréntesis: Un par de "(" y ")" que envuelven una expresión.
+
+Esta sería nuestra gramática resultante:
+
+expression → literal
+					| unary
+					| binary
+					| grouping ;
+literal → NUMBER | STRING | "true" | "false" | "nil" ;
+grouping → "(" expression ")" ;
+unary → ( "-" | "!" ) expression ;
+binary → expression operator expression ;
+operator → "==" | "!=" | "<" | "<=" | ">" | ">="
+				| "+" | "-" | "*" | "/" ;

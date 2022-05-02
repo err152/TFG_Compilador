@@ -1,3 +1,3 @@
 - JFlap para el autómata finito?
 - Opiniones sobre la implementación?
-- 
+- Atomatizo la creación del fichero Expr?
