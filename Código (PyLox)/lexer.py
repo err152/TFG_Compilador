@@ -106,7 +106,7 @@ class Lexer:
             return 'ERROR'
 
             
-if __name__ == '__main__':
+#if __name__ == '__main__':
     #analizador = Lexer("aAA  \n ass 34")
     #analizador = Lexer("> == *- 34")
     #analizador = Lexer("string 'Hola mundo' Sinbad el 'marino' soy")
@@ -119,8 +119,9 @@ if __name__ == '__main__':
     #       }
     #   }''')
     #analizador = Lexer(" true false and adn burrito")
-    analizador = Lexer(" a si //Esto es un comentario \n Holaa")
+    #analizador = Lexer(" a si //Esto es un comentario \n Holaa")
+    #analizador = Lexer('"string _ 34 */' ' " check')
     
-    for i in analizador.devolver_tokens():
-        print(i)
+    #for i in analizador.devolver_tokens():
+        #print(i)
         

@@ -379,7 +379,7 @@ SINGLE_CHARS: Tuple[str] = (
 MULTI_CHARS: Tuple[str] = ('!', '!=', '=', '==', '>', '>=', '<', '<=')
 ```
 
-Los tokens se componen de un número de linea, el tipo al que pertenecen y un valor dentro del tipo. Se definen todos los caracteres posibles bajo su nombre de tipo para poder utilizarlos a gusto en le resto del código.
+Los tokens son tuplas compuestas de un número de línea, el tipo al que pertenecen y un valor dentro del tipo. Se definen todos los caracteres posibles bajo su nombre de tipo para poder utilizarlos a gusto en le resto del código.
 
 Una vez definidos, ahora dada una cadena de caracteres debemos desarrollar un programa **lexer.py** que lea caracter a caracter y vaya identificando los distintos tipos de tokens según avance.
 
@@ -478,32 +478,11 @@ class Lexer:
             return 'ERROR'
 ```
 
-Este programa cuenta unos atributos llamados pos, inicio y linea que respectivamente indican la posición actual dentro de la cadena de caracteres, el inicio del token actualmente en proceso, y el número de linea actual.
+Este programa cuenta con unos atributos llamados pos, inicio y linea que respectivamente indican la posición actual dentro de la cadena de caracteres, el inicio del token actualmente en proceso, y el número de línea actual.
 
 En la función devuelve_token se avanza caracter a caracter aumentando pos hasta reconocer que ha terminado el token llamando a la funcion transición en cada iteración, devolviendo los caracteres del inicio hasta la posicion actual, junto a la linea (que también irá aumentando según se lea el caracter \n).
 
 La función transición es la que se encarga de ir reconociendo los caracteres e interpretarlos como los distintos tipos de tokens que tenemos, comprobando el caracter actual o los leídos desde el inicio hasta la posición actual, y devolviendo el tipo de Token en forma de string.
-
-```python
-if __name__ == '__main__':
-    #analizador = Lexer("aAA  \n ass 34")
-    #analizador = Lexer("> == *- 34")
-    #analizador = Lexer("string 'Hola mundo' Sinbad el 'marino' soy")
-    #analizador = Lexer(" '' ' ' ")
-    #analizador = Lexer(" 2 2345 2.356 2. ")
-    #analizador = Lexer('''class Brunch < Breakfast {
-    #   init(meat, bread, drink) {
-    #       super.init(meat, bread);
-    #       this.drink = drink;
-    #       }
-    #   }''')
-    #analizador = Lexer(" true false and adn burrito")
-    
-    for i in analizador.devolver_tokens():
-        print(i)
-```
-
-En el mismo fichero tenemos esta función main para probar nuestro scanner con distintas entradas para comprobar que cubrimos todos los casos posibles.
 
 
 
@@ -544,3 +523,14 @@ unary → ( "-" | "!" ) expression ;
 binary → expression operator expression ;
 operator → "==" | "!=" | "<" | "<=" | ">" | ">="
 				| "+" | "-" | "*" | "/" ;
+
+
+
+## El patrón Visitante
+
+Este patrón funciona de manera que teniendo dos subclases 'B' y 'C' que extienden a otra clase principal 'A', se crea una interfaz 'visitaBC' con un nuevo método para cada una de las subclases llamado 'visitaB' y 'visitaC', en la clase 'A' se agrega un método llamado 'acepta', y por último en cada una de las subclases se define este método 'acepta' de forma que se le pase la interfaz 'visitaBC' como parámetro y ahí se elija si 'visitaB' o 'visitaC'. Ahora cuando se desee realizar una operación se llama al método 'acepta' y se le pasa como parámetro el visitante (la interfaz) que se quiera ejecutar.
+
+Esto se conoce como polimorfismo, definido como la capacidad de llamar a objetos de distintos tipos con la misma sintaxis.
+
+
+

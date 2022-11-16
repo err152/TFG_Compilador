@@ -1,3 +1,9 @@
 - JFlap para el autómata finito?
-- Opiniones sobre la implementación?
 - Atomatizo la creación del fichero Expr?
+
+TODO: 
+- Dive into python cap 9 unittests
+- Memoria referenicas
+- Dabeaz cap 8
+- Diferencia libro y codigo domingo 
+- Informe iterativo incremental
