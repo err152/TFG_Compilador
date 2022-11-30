@@ -8,22 +8,22 @@ class TestLexer(unittest.TestCase):
     def test_singleChars(self):
         a = lexer.Lexer('{ / *')
         b = str(self.extrae_tokens(a))
-        assert b == '[[0,"LEFT_BRACE",{], [0,"None",/], [0,"STAR",*]]'
+        assert b == "[Token(linea=0, tipo='LEFT_BRACE', valor='{'), Token(linea=0, tipo=None, valor='/'), Token(linea=0, tipo='STAR', valor='*')]"
 
     def test_multiChars(self):
         a = lexer.Lexer('== > !=')
         b = str(self.extrae_tokens(a))
-        assert b == '[[0,"EQUAL_EQUAL",==], [0,"GREATER",>], [0,"BANG_EQUAL",!=]]'
+        assert b == "[Token(linea=0, tipo='EQUAL_EQUAL', valor='=='), Token(linea=0, tipo='GREATER', valor='>'), Token(linea=0, tipo='BANG_EQUAL', valor='!=')]"
 
     def test_comment(self):
         a = lexer.Lexer(' Hola //Esto es un comentario \n Holaa')
         b = str(self.extrae_tokens(a))
-        assert b == '[[0,"IDENTIFICADOR",Hola], [1,"IDENTIFICADOR",Holaa]]'
+        assert b == '[Token(linea=0, tipo='IDENTIFICADOR', valor='Hola'), Token(linea=1, tipo='IDENTIFICADOR', valor='Holaa')]'
 
     def test_espacio(self):
         a = lexer.Lexer('"espacio " 32 \ne2p4c10 ')
         b = str(self.extrae_tokens(a))
-        assert b == '[[0,"STRING","espacio "], [0,"NUMERO",32], [1,"IDENTIFICADOR",e2p4c10]]'
+        assert b == '[Token(linea=0, tipo='STRING', valor='"espacio "'), Token(linea=0, tipo='NUMERO', valor='32'), Token(linea=1, tipo='IDENTIFICADOR', valor='e2p4c10')]'
 
     def test_string(self):
         a = lexer.Lexer('"string _ 34 */' ' " check')
@@ -41,6 +41,7 @@ class TestLexer(unittest.TestCase):
     def test_id(self):
         a = lexer.Lexer(' true false and adn burrito')
         b = str(self.extrae_tokens(a))
+        print("---------------------",b)
         assert b == '[[0,"TRUE",true], [0,"FALSE",false], [0,"AND",and], [0,"IDENTIFICADOR",adn], [0,"IDENTIFICADOR",burrito]]'
 
     def test_total(self):

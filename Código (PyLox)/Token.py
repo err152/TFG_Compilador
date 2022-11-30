@@ -1,14 +1,12 @@
 from enum import Enum
 from typing import Dict,Tuple
+from dataclasses import dataclass
 
+@dataclass
 class Token:
-    def __init__(self, linea, tipo, valor):
-        self.linea = linea
-        self.tipo = tipo
-        self.valor = valor
-        
-    def __repr__(self):
-        return f'[{self.linea},"{self.tipo}",{self.valor}]'
+    linea : int
+    tipo : str
+    valor : str
 
 class TokenType(Enum):
     # Single-character tokens
@@ -73,4 +71,8 @@ SINGLE_CHARS: Tuple[str] = (
 )
 
 MULTI_CHARS: Tuple[str] = ('!', '!=', '=', '==', '>', '>=', '<', '<=')
+
+'''if __name__ == '__main__':
+    tokk = Token(0,'num',3)
+    print(tokk)'''
 

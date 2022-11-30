@@ -1,4 +1,5 @@
-- 
+- He hecho que Token y Lexer sean dataclasses, ¿está mejor como lo devuelve ahora?
+- caso default en funciones lambda
 
 TODO: 
 - 

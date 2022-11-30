@@ -1,12 +1,13 @@
+from dataclasses import dataclass
 from Token import (Token,TokenType,KEYWORDS,SINGLE_CHARS,
                    MULTI_CHARS)
 
+@dataclass
 class Lexer:
-    def __init__(self, entrada):
-        self.entrada = entrada
-        self.pos = 0
-        self.linea = 0
-        self.inicio = 0
+    entrada : str
+    pos : int = 0
+    linea : int = 0
+    inicio : int = 0
 
     def token_actual(self):
         return self.entrada[self.inicio:self.pos]
@@ -38,6 +39,7 @@ class Lexer:
         if estado not in ('inicial','ERROR','ESPACIO','COMMENT_'):
             yield Token(self.linea,estado,self.token_actual())
 
+    
     def transicion(self,estado,caracter,mid):
         if estado == 'inicial' and caracter in SINGLE_CHARS: # BIEN
             return TokenType(caracter).name
@@ -107,7 +109,12 @@ class Lexer:
 
             
 #if __name__ == '__main__':
-    #analizador = Lexer("aAA  \n ass 34")
+    #a = Lexer('"espacio " 32 \ne2p4c10 ')
+    #l = []
+    #for i in a.devolver_tokens():
+    #    l.append(i)
+    #print(l)
+    #analizador = Lexer("AAAAAA  A")
     #analizador = Lexer("> == *- 34")
     #analizador = Lexer("string 'Hola mundo' Sinbad el 'marino' soy")
     #analizador = Lexer(" '' ' ' ")
@@ -123,5 +130,5 @@ class Lexer:
     #analizador = Lexer('"string _ 34 */' ' " check')
     
     #for i in analizador.devolver_tokens():
-        #print(i)
+    #    print(i)
         
