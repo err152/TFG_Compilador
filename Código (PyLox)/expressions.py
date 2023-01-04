@@ -1,10 +1,6 @@
-import Token from Token
-import ABC, abstractmethod from abc
-
-class Expr(self,ABC):
-   @abstractmethod
-   def accept(Visitor):
-       pass
+from Token import Token
+from typing import Any
+from abc import ABC, abstractmethod
 
 class Visitor(ABC):
    @abstractmethod
@@ -24,6 +20,11 @@ class Visitor(ABC):
        pass
 
 
+class Expr(ABC):
+   @abstractmethod
+   def acepta(Visitor):
+       pass
+
 class Binary(Expr):
    def __init__(self,left:Expr,operator:Token,right:Expr):
        self.left = left
@@ -41,7 +42,7 @@ class Grouping(Expr):
        return visitor.visit_grouping_expr(self)
 
 class Literal(Expr):
-   def __init__(self,value:Object):
+   def __init__(self,value:Any):
        self.value = value
 
    def acepta(self, visitor: Visitor):

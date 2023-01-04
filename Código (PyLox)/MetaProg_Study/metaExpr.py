@@ -5,18 +5,19 @@
 import os
     
 def defineAst(self, outputDir:str, baseName:str, types:[]):
-    path = outputDir + "/" + baseName + ".py"
+    path = outputDir + "/" + "expressions" + ".py"
     assert os.path.isfile(path)
     with open(path,'w')as f:
-        f.write("import Token from Token" + "\n")
-        f.write("import ABC, abstractmethod from abc" + "\n\n")
-        f.write("class " + baseName + "(self,ABC):" + "\n")
-        
-        f.write("   @abstractmethod"+"\n")
-        f.write("   def accept(Visitor):"+"\n")
-        f.write("       pass"+"\n\n")
+        f.write("from Token import Token" + "\n")
+        f.write("from typing import Any" + "\n")
+        f.write("from abc import ABC, abstractmethod" + "\n\n")
 
         defineVisitor(self,f,baseName,types)
+        
+        f.write("class " + baseName + "(ABC):" + "\n")
+        f.write("   @abstractmethod"+"\n")
+        f.write("   def acepta(Visitor):"+"\n")
+        f.write("       pass"+"\n\n")
 
         for tipe in types:
             className = tipe.split(":")[0].strip()
@@ -69,6 +70,6 @@ class GenerateAst:
         
         defineAst(self,outputDir,"Expr",["Binary : Expr left, Token operator, Expr right",
                                 "Grouping : Expr expression",
-                                "Literal : Object value",
+                                "Literal : Any value",
                                 "Unary : Token operator, Expr right"])
     

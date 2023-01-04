@@ -1,44 +1,52 @@
-# sum: NUMBER | NUMBER ‘+’ sum
+import expressions
+from Token import Token, TokenType
+import re
 
-def sum(lista_tokens):
-    valor = 0
-    t = siguiente_token(lista_tokens)
-    if t == 'NUMBER':
-        valor = valor + t
-        descarta(lista_tokens)
-        if siguiente_token(lista_tokens) == '+':
-            descarta(lista_tokens)
-            return valor + sum(lista_tokens)
-    else:
-        raise Exception("No es un numero")
+tokens = []
+current = 0
 
-# res: NUMBER | NUMBER '-' res
+def match(self,*types:TokenType) -> bool:
+    for tipo in types:
+        if self.check(type):
+            self.advance()
+            return True
+    return False
 
-def res(lista_tokens):
-    valor = 0
-    t = siguiente_token(lista_tokens)
-    if t == 'NUMBER':
-        valor = valor + t
-        descarta(lista_tokens)
-        if siguiente_token(lista_tokens) == '+':
-            descarta(lista_tokens)
-            return valor + res(lista_tokens)
-    else:
-        raise Exception("No es un numero")
+def check(self,tipo:TokenType) -> bool:
+    if self.isAtEnd():
+        return false
+    return self.peek().tipo == tipo
 
-# mul: NUMBER | NUMBER '*' mul
+def isAtEnd(self) -> bool:
+    return self.peek().tipo == TokenType.EOF # definido?
+    
+def peek(self) -> Token:
+    return self.tokens[self.current]
+    
+def previous(self) -> Token:
+    return self.tokens[self.current-1]
 
-def mul(lista_tokens):
-    valor = 0
-    t = siguiente_token(lista_tokens)
-    if t.type == 'NUMBER':
-        valor = valor + t
-        descarta(lista_tokens)
-        if siguiente_token(lista_tokens) == '+':
-            descarta(lista_tokens)
-            return valor + res(lista_tokens)
-    else:
-        raise Exception("No es un numero")
+def advance(self) -> Token:
+    if self.isAtEnd() == false:
+        self.current += 1
+    return self.previous()
+
+    
+def expression(self) -> expressions.Expr:
+    return self.exquality()
+
+def equality(self) -> expressions.Expr:
+    expr = self.comparison()
+
+    while self.match(TokenType.BANG_EQUAL,TokenType.EQUAL_EQUAL):
+        operator = self.previous()
+        right = self.comparison()
+        expr = expressions.Binary(expr,operator,right)
+
+    return expr
+
+
+## Implementación Domingo con ¿supertipos?
 
 def arithmetic_func(funcion):
     def func_temp(lista_tokens):
