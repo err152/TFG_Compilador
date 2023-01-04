@@ -1,5 +1,13 @@
+- He terminado una primera versión del parser siguiendo el libro
+- He usado el pasar funciones como argumento para ahorrar codigo
+- He creado la clase lox de framework (no funciona)
+- He creado MetaExpr que metaprograma el fichero expressions
+
 - He hecho que Token y Lexer sean dataclasses, ¿está mejor como lo devuelve ahora?
 - caso default en funciones lambda
 
 TODO: 
-- 
+- La memoria no ha sido modificada
+- Crear un tester para el parser
+- Continuar (he visto que puedo realizar un tema del libro en dos dias,
+	     trataré de seguir este ritmo de ahora en adelante)
