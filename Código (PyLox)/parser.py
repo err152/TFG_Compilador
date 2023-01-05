@@ -70,10 +70,10 @@ def primary(self) -> expressions.Expr:
     if match(TokenType.TRUE):
         return expressions.Literal(true)
     if match(TokenType.NIL):
-        return expressions.Litereal(null)
+        return expressions.Literal(null)
 
     if match(TokenType.NUMBER,TokenType.STRING):
-        return expressions.Litereal(previous().literal)
+        return expressions.Literal(previous().literal)
 
     if match(TokenType.LEFT_PAREN):
         expr = expression()
@@ -144,7 +144,7 @@ def equality(self) -> expressions.Expr:
     return expr
 '''
 
-'''
+
     
 ## Implementación Domingo
 
@@ -167,4 +167,4 @@ def mul(x,y):
 
 def pot(x):
     return x*x
-'''  
+ 
