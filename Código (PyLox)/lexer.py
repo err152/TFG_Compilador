@@ -9,6 +9,9 @@ class Lexer:
     linea : int = 0
     inicio : int = 0
 
+    def __init__(self,source:str):
+        self.entrada=source
+
     def token_actual(self):
         return self.entrada[self.inicio:self.pos]
 
@@ -21,13 +24,13 @@ class Lexer:
             nuevo_estado = self.transicion(estado,caracter,mid)
             if nuevo_estado == 'ERROR':
                 if estado not in ('ESPACIO','NUMERO_','COMMENT_'):
-                    yield Token(self.linea,estado,self.token_actual())
+                    yield Token(self.linea,estado,"'"+self.token_actual()+"'")
                 self.inicio = self.pos
                 estado = 'inicial'
                 
             elif nuevo_estado == 'ESPACIO':
                 if estado not in ('inicial','ERROR','ESPACIO'):
-                    yield Token(self.linea,estado,self.token_actual())
+                    yield Token(self.linea,estado,"'"+self.token_actual()+"'")
                 self.inicio = self.pos
                 self.pos += 1
                 estado = nuevo_estado
@@ -106,6 +109,12 @@ class Lexer:
 
         else:
             return 'ERROR'
+
+    def extrae_tokens(self):
+        l = []
+        for i in self.devolver_tokens():
+            l.append(i)
+        return l
 
             
 #if __name__ == '__main__':
