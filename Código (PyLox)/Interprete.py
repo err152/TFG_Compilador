@@ -24,7 +24,9 @@ class Interprete(expressions.Visitor):
       try:
          value = evaluate(expression)
          print(stringify(value))
-      except:
+      #except RuntimeError as error:
+      except error:
+         #Lox.runtimeError(error)
          print("Lox.runtimeError") # Provisional
 
    def check_number_operand(operator: Token, operand: any):
