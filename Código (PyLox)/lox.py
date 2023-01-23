@@ -29,6 +29,7 @@ class Lox:
     def run(source:str):
         lex = Lexer(source)
         tokens = lex.extrae_tokens()
+        print(f"-- tokens : {tokens}")
     
         '''
         for token in tokens:
@@ -36,7 +37,7 @@ class Lox:
         '''
 
         pars = Parser(tokens)
-        print(f"-- {pars.tokens}")
+        print(f"-- tokens in parser : {pars.tokens}")
         expr = pars.parse()
         print(f"-- expr : {expr}")
 

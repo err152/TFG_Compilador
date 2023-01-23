@@ -1,15 +1,6 @@
 from enum import Enum
 from typing import Dict,Tuple
 
-class Token:
-    def __init__(self, linea, tipo, valor):
-        self.linea = linea
-        self.tipo = tipo
-        self.valor = valor
-
-    def __repr__(self):
-        return f'[{self.linea},"{self.tipo}",{self.valor}]'
-
 class TokenType(Enum):
     # Single-character tokens
     LEFT_PAREN = '('
@@ -60,6 +51,15 @@ class TokenType(Enum):
 
     # end-of-file
     EOF = ''
+
+class Token:
+    def __init__(self, linea:int, tipo:TokenType, valor:any):
+        self.linea = linea
+        self.tipo = tipo
+        self.valor = valor
+
+    def __repr__(self):
+        return f'''Token({self.linea},TokenType.{self.tipo},"{self.valor}")'''
 
 _keywords: Tuple[str] = (
     'true','false','nil','and','or','if','else','fun','return','for','class',

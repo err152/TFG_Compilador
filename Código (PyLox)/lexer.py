@@ -23,14 +23,14 @@ class Lexer:
             #print("----- ",self.inicio," : ",estado," : ",caracter," : ",mid," : ",self.pos)
             nuevo_estado = self.transicion(estado,caracter,mid)
             if nuevo_estado == 'ERROR':
-                if estado not in ('ESPACIO','NUMERO_','COMMENT_'):
-                    yield Token(self.linea,estado,"'"+self.token_actual()+"'")
+                if estado not in ('ESPACIO','NUMBER_','COMMENT_'):
+                    yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 estado = 'inicial'
                 
             elif nuevo_estado == 'ESPACIO':
                 if estado not in ('inicial','ERROR','ESPACIO'):
-                    yield Token(self.linea,estado,"'"+self.token_actual()+"'")
+                    yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 self.pos += 1
                 estado = nuevo_estado
@@ -44,10 +44,10 @@ class Lexer:
 
     
     def transicion(self,estado,caracter,mid):
-        if estado == 'inicial' and caracter in SINGLE_CHARS: # BIEN
+        if estado == 'inicial' and caracter in SINGLE_CHARS: 
             return TokenType(caracter).name
 
-        elif estado == 'inicial' and caracter in MULTI_CHARS: # BIEN
+        elif estado == 'inicial' and caracter in MULTI_CHARS: 
             self.pos += 1
             mid = self.entrada[self.inicio:self.pos+1]
             if mid in MULTI_CHARS:
@@ -70,8 +70,8 @@ class Lexer:
             else:
                 return 'COMMENT_'
 
-        elif estado not in ('STRING_','NUMERO_','IDENTIFICADOR') and (caracter.isspace()
-                                           or caracter == '\n'): # BIEN
+        elif estado not in ('STRING_','NUMBER_','IDENTIFICADOR') and (caracter.isspace()
+                                           or caracter == '\n'): 
             if caracter == '\n':
                 self.linea += 1
             return 'ESPACIO'
@@ -86,17 +86,19 @@ class Lexer:
                 return 'STRING_'
 
         elif estado == 'inicial' and caracter.isdigit():
-            return 'NUMERO'
+            return 'NUMBER'
 
-        elif estado == 'NUMERO':
+        elif estado == 'NUMBER':
             if caracter.isdigit():
-                return 'NUMERO'
+                return 'NUMBER'
             elif caracter == '.':
-                return 'NUMERO_'
+                return 'NUMBER_'
+            else:
+                return 'ERROR'
             
-        elif estado == 'NUMERO_':
+        elif estado == 'NUMBER_':
             if caracter.isdigit():
-                return 'NUMERO'
+                return 'NUMBER'
             else:
                 return 'ERROR'
 
@@ -117,7 +119,10 @@ class Lexer:
         return l
 
             
-#if __name__ == '__main__':
+if __name__ == '__main__':
+    a = Lexer('''1+2''')
+    b = str(a.extrae_tokens())
+    print(b)
     #a = Lexer('"espacio " 32 \ne2p4c10 ')
     #l = []
     #for i in a.devolver_tokens():

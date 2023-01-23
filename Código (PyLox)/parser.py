@@ -15,42 +15,43 @@ class Parser:
             self.token=token
 
     def match(self,*types:TokenType) -> bool:
-        print(f"--------- INSIDE: MATCH {types}")
+        print("--- Dentro match:")
         for tipo in types:
-            if self.check(tipo):
+            if type(tipo) is list:
+                for i in tipo:
+                    if self.check(i):
+                        print(f"----- tip : {i}")
+                        self.advance()
+                        return True
+            elif self.check(tipo):
+                print(f"----- tipo : {tipo}")
                 self.advance()
                 return True
         return False
 
     def check(self,tipo:TokenType) -> bool:
-        print(f"---------- INSIDE: CHECK {tipo}")
         if self.isAtEnd():
             return false
         s = self.peek().tipo == tipo
-        print(f"---------- INSIDE: CHECK {self.peek().tipo}")
-        print(f"---------- INSIDE: CHECK {s}")
+        print(f"----- actual : {self.peek().tipo} =? {tipo} --> {s}")
         return self.peek().tipo == tipo
 
     def isAtEnd(self) -> bool:
-        #print(f"----------- INSIDE: END?")
-        return self.peek().tipo == TokenType.EOF # definido?
+        return self.peek().tipo == TokenType.EOF
     
     def peek(self) -> Token:
-        #print(f"------------ INSIDE: PEEK {self.tokens[self.current]}")
         return self.tokens[self.current]
     
     def previous(self) -> Token:
         return self.tokens[self.current-1]
 
     def advance(self) -> Token:
-        print(f"---------- INSIDE: AVANZ")
         if self.isAtEnd() == False:
             self.current += 1
         return self.previous()
 
     def error(self,token:Token,msg:str) -> ParseError:
-        print(f"------------- INSIDE: ERROR")
-        #lexer.error(token,msg) # Mi lexer no tiene
+        #lox.error(token,msg)
         return self.ParseError(token,msg)
 
     def synchronize():
@@ -75,7 +76,6 @@ class Parser:
         raise self.error(self.peek(),msg)
 
     def primary(self) -> expressions.Expr:
-        print("---------- INSIDE: PRIMA")
         if self.match(TokenType.FALSE):
             return expressions.Literal(false)
         if self.match(TokenType.TRUE):
@@ -84,19 +84,17 @@ class Parser:
             return expressions.Literal(null)
 
         if self.match(TokenType.NUMBER,TokenType.STRING):
-            return expressions.Literal(self.previous().literal)
+            return expressions.Literal(self.previous().valor)
 
         if self.match(TokenType.LEFT_PAREN):
             expr = expression()
-            consume(RIGHT_PAREN,"Expect ')' after expression.")
+            consume(TokenType.RIGHT_PAREN,"Expect ')' after expression.")
             return expressions.Grouping(expr)
 
         self.error(self.peek(),"Expect expression.")
     
     def unary(self) -> expressions.Expr:
-        print("--------- INSIDE: UNA")
         if self.match(TokenType.BANG,TokenType.MINUS):
-            print("--------- INSIDE: UNA if")
             operator = previous()
             right = unary()
             return expressions.Unary(operator,right)
@@ -104,48 +102,40 @@ class Parser:
         return self.primary()
 
     def binary_op(self,func,tipos) -> expressions.Expr:
-        print("-------- INSIDE: BINOP")
         expr = func
-        print(f"------- func = {expr}")
 
         while self.match(tipos):
             operator = self.previous()
             right = func
             expr = expressions.Binary(expr,operator,right)
 
+        print(f"BINARYOP : {expr}")
         return expr
 
     def factor(self) -> expressions.Expr:
-        print("------- INSIDE: FAC")
         tipos = [TokenType.SLASH,TokenType.STAR]
         return self.binary_op(self.unary(),tipos)
 
     def term(self) -> expressions.Expr:
-        print("------ INSIDE: TER")
         tipos = [TokenType.MINUS,TokenType.PLUS]
         return self.binary_op(self.factor(),tipos)
 
     def comparison(self) -> expressions.Expr:
-        print("----- INSIDE: COM")
         tipos = [TokenType.GREATER,TokenType.GREATER_EQUAL,TokenType.LESS,TokenType.LESS_EQUAL]
         return self.binary_op(self.term(),tipos)
 
     def equality(self) -> expressions.Expr:
-        print("---- INSIDE: EQU")
         tipos = [TokenType.BANG_EQUAL,TokenType.EQUAL_EQUAL]
         return self.binary_op(self.comparison(),tipos)
 
     def expression(self) -> expressions.Expr:
-        print("--- INSIDE: EXP")
         return self.equality()
 
     def parse(self) -> expressions.Expr:
-        print("-- INSIDE: PARSE")
+        print(self.tokens)
         try:
-            print("-- INSIDE: PARSE try")
             return self.expression()
         except self.ParseError:
-            print("-- INSIDE: PARSE except")
             return None
 
 

@@ -22,12 +22,12 @@ class Interprete(expressions.Visitor):
 
    def interpret(self,expression:expressions.Expr):
       try:
-         value = evaluate(expression)
+         value = self.evaluate(expression)
          print(stringify(value))
-      #except RuntimeError as error:
-      except error:
-         #Lox.runtimeError(error)
-         print("Lox.runtimeError") # Provisional
+      except RuntimeError as error:
+         Lox.runtimeError(error)
+      #except error:
+         #print("Lox.runtimeError") # Provisional
 
    def check_number_operand(operator: Token, operand: any):
       if self.is_number(operand):
@@ -48,8 +48,8 @@ class Interprete(expressions.Visitor):
    def is_truthy(obj: any) -> bool:
       return bool(obj)
 
-   def evaluate(expr: expressions.Expr):
-      return expr.accept(self)
+   def evaluate(self,expr: expressions.Expr):
+      return expr.acepta(self)
 
    def visit_literal_expr(self,expr: expressions.Literal):
       return expr.valor

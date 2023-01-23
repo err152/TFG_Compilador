@@ -8,41 +8,45 @@ class TestLexer(unittest.TestCase):
     def test_singleChars(self):
         a = lexer.Lexer('{ / *')
         b = str(a.extrae_tokens())
-        assert b == '''[[0,"LEFT_BRACE",{], [0,"None",/], [0,"STAR",*]]'''
+        assert b == '''[Token(0,TokenType.LEFT_BRACE,"{"), Token(0,TokenType.None,"/"), Token(0,TokenType.STAR,"*")]'''
+
+    def test_addition(self):
+        a = lexer.Lexer('1+1')
+        b = str(a.extrae_tokens())
+        assert b == '''[Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"1")]'''
 
     def test_multiChars(self):
         a = lexer.Lexer('== > !=')
         b = str(a.extrae_tokens())
-        assert b == '''[[0,"EQUAL_EQUAL",==], [0,"GREATER",>], [0,"BANG_EQUAL",!=]]'''
+        assert b == '''[Token(0,TokenType.EQUAL_EQUAL,"=="), Token(0,TokenType.GREATER,">"), Token(0,TokenType.BANG_EQUAL,"!=")]'''
 
     def test_comment(self):
         a = lexer.Lexer(' Hola //Esto es un comentario \n Holaa')
         b = str(a.extrae_tokens())
-        assert b == '''[[0,"IDENTIFICADOR",Hola], [1,"IDENTIFICADOR",Holaa]]'''
+        assert b == '''[Token(0,TokenType.IDENTIFICADOR,"Hola"), Token(1,TokenType.IDENTIFICADOR,"Holaa")]'''
 
     def test_espacio(self):
         a = lexer.Lexer('"espacio " 32 \ne2p4c10 ')
         b = str(a.extrae_tokens())
-        print(b)
-        assert b == '''[[0,"STRING","espacio "], [0,"NUMERO",32], [1,"IDENTIFICADOR",e2p4c10]]'''
+        assert b == '''[Token(0,TokenType.STRING,""espacio ""), Token(0,TokenType.NUMBER,"32"), Token(1,TokenType.IDENTIFICADOR,"e2p4c10")]'''
 
     def test_string(self):
         a = lexer.Lexer('"string _ 34 */' ' " check')
         b = str(a.extrae_tokens())
-        assert b == '''[[0,"STRING","string _ 34 */ "], [0,"IDENTIFICADOR",check]]'''
+        assert b == '''[Token(0,TokenType.STRING,""string _ 34 */ ""), Token(0,TokenType.IDENTIFICADOR,"check")]'''
         c = lexer.Lexer(' "" " " ')
         d = str(c.extrae_tokens())
-        assert d == '''[[0,"STRING",""], [0,"STRING"," "]]'''
+        assert d == '''[Token(0,TokenType.STRING,""""), Token(0,TokenType.STRING,"" "")]'''
 
-    def test_numero(self):
+    def test_NUMBER(self):
         a = lexer.Lexer(' 2 2345 2.356 2. ')
         b = str(a.extrae_tokens())
-        assert b == '''[[0,"NUMERO",2], [0,"NUMERO",2345], [0,"NUMERO",2.356]]'''
+        assert b == '''[Token(0,TokenType.NUMBER,"2"), Token(0,TokenType.NUMBER,"2345"), Token(0,TokenType.NUMBER,"2.356")]'''
 
     def test_id(self):
         a = lexer.Lexer(' true false and adn burrito')
         b = str(a.extrae_tokens())
-        assert b == '''[[0,"TRUE",true], [0,"FALSE",false], [0,"AND",and], [0,"IDENTIFICADOR",adn], [0,"IDENTIFICADOR",burrito]]'''
+        assert b == '''[Token(0,TokenType.TRUE,"true"), Token(0,TokenType.FALSE,"false"), Token(0,TokenType.AND,"and"), Token(0,TokenType.IDENTIFICADOR,"adn"), Token(0,TokenType.IDENTIFICADOR,"burrito")]'''
 
     def test_total(self):
         a = lexer.Lexer('''class Brunch < Breakfast {
@@ -52,7 +56,7 @@ class TestLexer(unittest.TestCase):
                }
            }''')
         b = str(a.extrae_tokens())
-        assert b == '''[[0,"CLASS",class], [0,"IDENTIFICADOR",Brunch], [0,"LESS",<], [0,"IDENTIFICADOR",Breakfast], [1,"LEFT_BRACE",{], [1,"IDENTIFICADOR",init], [1,"LEFT_PAREN",(], [1,"IDENTIFICADOR",meat], [1,"COMMA",,], [1,"IDENTIFICADOR",bread], [1,"COMMA",,], [1,"IDENTIFICADOR",drink], [1,"RIGHT_PAREN",)], [2,"LEFT_BRACE",{], [2,"SUPER",super], [2,"DOT",.], [2,"IDENTIFICADOR",init], [2,"LEFT_PAREN",(], [2,"IDENTIFICADOR",meat], [2,"COMMA",,], [2,"IDENTIFICADOR",bread], [2,"RIGHT_PAREN",)], [3,"SEMICOLON",;], [3,"THIS",this], [3,"DOT",.], [3,"IDENTIFICADOR",drink], [3,"EQUAL",=], [3,"IDENTIFICADOR",drink], [4,"SEMICOLON",;], [5,"RIGHT_BRACE",}], [5,"RIGHT_BRACE",}]]'''
-                           
+        assert b == '''[Token(0,TokenType.CLASS,"class"), Token(0,TokenType.IDENTIFICADOR,"Brunch"), Token(0,TokenType.LESS,"<"), Token(0,TokenType.IDENTIFICADOR,"Breakfast"), Token(1,TokenType.LEFT_BRACE,"{"), Token(1,TokenType.IDENTIFICADOR,"init"), Token(1,TokenType.LEFT_PAREN,"("), Token(1,TokenType.IDENTIFICADOR,"meat"), Token(1,TokenType.COMMA,","), Token(1,TokenType.IDENTIFICADOR,"bread"), Token(1,TokenType.COMMA,","), Token(1,TokenType.IDENTIFICADOR,"drink"), Token(1,TokenType.RIGHT_PAREN,")"), Token(2,TokenType.LEFT_BRACE,"{"), Token(2,TokenType.SUPER,"super"), Token(2,TokenType.DOT,"."), Token(2,TokenType.IDENTIFICADOR,"init"), Token(2,TokenType.LEFT_PAREN,"("), Token(2,TokenType.IDENTIFICADOR,"meat"), Token(2,TokenType.COMMA,","), Token(2,TokenType.IDENTIFICADOR,"bread"), Token(2,TokenType.RIGHT_PAREN,")"), Token(3,TokenType.SEMICOLON,";"), Token(3,TokenType.THIS,"this"), Token(3,TokenType.DOT,"."), Token(3,TokenType.IDENTIFICADOR,"drink"), Token(3,TokenType.EQUAL,"="), Token(3,TokenType.IDENTIFICADOR,"drink"), Token(4,TokenType.SEMICOLON,";"), Token(5,TokenType.RIGHT_BRACE,"}"), Token(5,TokenType.RIGHT_BRACE,"}")]'''
+
 if __name__ == '__main__':
     unittest.main()
