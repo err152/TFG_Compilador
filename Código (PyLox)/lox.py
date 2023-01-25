@@ -39,9 +39,11 @@ class Lox:
         pars = Parser(tokens)
         print(f"-- tokens in parser : {pars.tokens}")
         expr = pars.parse()
+        #stmts = pars.parse()
         print(f"-- expr : {expr}")
 
         Lox.interpreter.interpret(expr)
+        #Lox.interpreter.interpret(stmts)
     
         print(AstPrinter.AstPrinter().print(expr))
 

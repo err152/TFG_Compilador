@@ -130,15 +130,42 @@ class Parser:
 
     def expression(self) -> expressions.Expr:
         return self.equality()
+    
+    # Modificación post-Statements
+    '''
+    def statement(self) -> statements.Stmt:
+        if match(PRINT):
+            return self.printStatement()
+        
+        return self.expressionStatement()
 
+    def printStatement(self) -> statements.Stmt:
+        value = self.expression()
+        consume(TokenType.SEMICOLON,"Expect ';' after value.")
+        return statements.Stmt.Print(value)
+
+    def expressionStatement(self) -> statements.Stmt:
+        expr = self.expression()
+        consume(TokenType.SEMICOLON,"Expect ';' after value.")
+        return statements.Stmt.Expression(expr)
+    '''
+    
     def parse(self) -> expressions.Expr:
         print(self.tokens)
         try:
             return self.expression()
         except self.ParseError:
             return None
+   
+    # Parser post-Statements
+    '''
+    def parse(self) -> *statements.Stmt:
+        statements = []
+        while not isAtEnd():
+            statements.append(self.statement())
 
-
+        return statements
+    '''
 
 '''
 def comparison(self) -> expressions.Expr:

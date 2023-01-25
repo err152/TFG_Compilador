@@ -1,5 +1,6 @@
 from Token import Token,TokenType
 import expressions
+#import statements
 
 class LoxRuntimeError(RuntimeError):
    token = None
@@ -8,7 +9,7 @@ class LoxRuntimeError(RuntimeError):
       super(msg)
       self.token = token
 
-class Interprete(expressions.Visitor):
+class Interprete(expressions.Visitor): #,statements.Visitor
 
    def stringify(self, obj:any) -> str:
       if obj == None:
@@ -28,6 +29,16 @@ class Interprete(expressions.Visitor):
          Lox.runtimeError(error)
       #except error:
          #print("Lox.runtimeError") # Provisional
+         
+   # Modificación post-Statements
+   '''
+   def interpret(self,statements:statements.Stmt):
+      try:
+         for statement in statements:
+            self.execute(statement)
+      except RuntimeError as error:
+         Lox.runtimeError(error)
+   '''
 
    def check_number_operand(operator: Token, operand: any):
       if self.is_number(operand):
@@ -50,6 +61,21 @@ class Interprete(expressions.Visitor):
 
    def evaluate(self,expr: expressions.Expr):
       return expr.acepta(self)
+
+   # Modificacion post_Statements
+   '''
+   def execute(self,stmt: statements.Stmt):
+      stmt.accept(self)
+
+   def visit_expression_stmt(self,stmt: statements.Expression):
+      evaluate(stmt.expression)
+      return None
+
+   def visit_print_stmt(self,stmt: statements.Print):
+      value = evaluate(stmt.expression)
+      print(self.stringify(value))
+      return None
+      '''
 
    def visit_literal_expr(self,expr: expressions.Literal):
       return expr.valor

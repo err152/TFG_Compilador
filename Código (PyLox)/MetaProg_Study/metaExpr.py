@@ -2,10 +2,11 @@
 # Copiar para ejecutar código
 # GenerateAst("C:/Users/Eduardo/Desktop/Universidad/2o Cuatri/TFG_compilador/Código (PyLox)")
 
+from argparse import ArgumentParser
 import os
     
 def defineAst(self, outputDir:str, baseName:str, types:[]):
-    path = outputDir + "/" + "expressions" + ".py"
+    path = outputDir
     assert os.path.isfile(path)
     with open(path,'w')as f:
         f.write("from Token import Token" + "\n")
@@ -24,7 +25,6 @@ def defineAst(self, outputDir:str, baseName:str, types:[]):
             fields = tipe.split(":")[1].strip()
             defineType(self,f,baseName,className,fields)
  
-        f.close()
 
 def defineVisitor(self, f, baseName:str, types:[]):
     f.write("class Visitor(ABC):"+"\n")
@@ -68,8 +68,13 @@ class GenerateAst:
             print("Error: generate_ast <output directory>")
         outputDir = args[0]
         
-        defineAst(self,outputDir,"Expr",["Binary : Expr left, Token operator, Expr right",
+        defineAst(self,outputDir+'/expressions.py',"Expr",["Binary : Expr left, Token operator, Expr right",
                                 "Grouping : Expr expression",
                                 "Literal : Any value",
-                                "Unary : Token operator, Expr right"])
+                                "Unary : Token operator, Expr right",
+                                "Variable : Token name"])
+
+        defineAst(self,outputDir+'/statements.py',"Stmt",["Expression : Expr expression",
+                                         "Print : Expr expression",
+                                         "Var : Token name, Expr initializer"])
     
