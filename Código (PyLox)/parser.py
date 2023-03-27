@@ -105,8 +105,10 @@ class Parser:
         expr = func
 
         while self.match(tipos):
+            a = self.peek()
             operator = self.previous()
-            right = func
+            b = self.peek()
+            right = self.expression()
             expr = expressions.Binary(expr,operator,right)
 
         print(f"BINARYOP : {expr}")
@@ -189,7 +191,6 @@ def equality(self) -> expressions.Expr:
     return expr
 '''
 
-
     
 ## Implementación Domingo
 
@@ -212,4 +213,9 @@ def mul(x,y):
 
 def pot(x):
     return x*x
- 
+
+if __name__ == '__main__':
+    pars = Parser([Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"2")])
+    print(f"-- tokens in parser : {pars.tokens}")
+    expr = pars.parse()
+    print(f"-- expr : {expr}")

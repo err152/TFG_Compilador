@@ -8,6 +8,7 @@ class TestLexer(unittest.TestCase):
     def test_singleChars(self):
         a = lexer.Lexer('{ / *')
         b = str(a.extrae_tokens())
+        print(b)
         assert b == '''[Token(0,TokenType.LEFT_BRACE,"{"), Token(0,TokenType.None,"/"), Token(0,TokenType.STAR,"*")]'''
 
     def test_addition(self):
