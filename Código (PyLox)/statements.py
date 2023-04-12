@@ -1,4 +1,4 @@
-'''from Token import Token
+from Token import Token
 from typing import Any
 from abc import ABC, abstractmethod
 
@@ -42,4 +42,4 @@ class Var(Stmt):
 
    def acepta(self, visitor: Visitor):
        return visitor.visit_var_stmt(self)
-'''
+

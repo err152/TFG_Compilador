@@ -1,4 +1,4 @@
-from Token import Token
+from Token import Token,TokenType
 from typing import Any
 from abc import ABC, abstractmethod
 
@@ -19,18 +19,15 @@ class Visitor(ABC):
    def visit_unary_expr(self, expr: 'Expr'):
        pass
 
-   @abstractmethod
-   def visit_variable_expr(self, expr: 'Expr'):
-       pass
+   #@abstractmethod
+   #def visit_variable_expr(self, expr: 'Expr'):
+       #pass
 
 
 class Expr(ABC):
    @abstractmethod
    def acepta(Visitor):
        pass
-
-   def __repr__(self):
-      return str(type(self))
 
 class Binary(Expr):
    def __init__(self,left:Expr,operator:Token,right:Expr):
@@ -40,9 +37,6 @@ class Binary(Expr):
 
    def acepta(self, visitor: Visitor):
        return visitor.visit_binary_expr(self)
-
-   def __repr__(self):
-      return str(self.left)+str(self.operator)+str(self.right)
 
 class Grouping(Expr):
    def __init__(self,expression:Expr):
@@ -59,7 +53,7 @@ class Literal(Expr):
        return visitor.visit_literal_expr(self)
 
    def __repr__(self):
-      return str(self.value)
+      return self.value
 
 class Unary(Expr):
    def __init__(self,operator:Token,right:Expr):
@@ -75,4 +69,5 @@ class Variable(Expr):
 
    def acepta(self, visitor: Visitor):
        return visitor.visit_variable_expr(self)
+
 

@@ -3,12 +3,12 @@ from sys import argv
 
 from parser import Parser
 from lexer import Lexer
-from Interprete import Interprete,LoxRuntimeError
+#from Interprete import Interprete,LoxRuntimeError
 from Token import Token,TokenType
 import AstPrinter
 
 class Lox:
-    interpreter = Interprete()
+    #interpreter = Interprete()
     hadError = False
     hadRuntimeError = False
 
@@ -22,9 +22,9 @@ class Lox:
         else:
             Lox.report(token.linea," at '"+token.value+"'",msg)
 
-    def runtimeError(error:LoxRuntimeError):
-        print(f"{error.message}\n[line {error.token.linea}]")
-        Lox.hadRuntimeError = true
+    #def runtimeError(error:LoxRuntimeError):
+        #print(f"{error.message}\n[line {error.token.linea}]")
+        #Lox.hadRuntimeError = true
 
     def run(source:str):
         lex = Lexer(source)
@@ -42,7 +42,7 @@ class Lox:
         #stmts = pars.parse()
         print(f"-- expr : {expr}")
 
-        Lox.interpreter.interpret(expr)
+        #Lox.interpreter.interpret(expr)
         #Lox.interpreter.interpret(stmts)
     
         print(AstPrinter.AstPrinter().print(expr))

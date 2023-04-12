@@ -65,6 +65,9 @@ class Token:
     def __repr__(self):
         return f'''Token({self.linea},{self.tipo},"{self.valor}")'''
 
+    def tipo(self) -> TokenType:
+        return self.tipo
+
 _keywords: Tuple[str] = (
     'true','false','nil','and','or','if','else','fun','return','for','class',
     'super','this','while','print'

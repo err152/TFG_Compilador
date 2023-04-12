@@ -31,10 +31,12 @@ class Parser:
 
     def check(self,tipo:TokenType) -> bool:
         if self.isAtEnd():
-            return false
-        s = self.peek().tipo == tipo
+            return False
+        print("----- tipo ::: ",type(self.peek().tipo))
+        print(":::::::: tipo = ", getattr(self.peek(),"tipo"))
+        s = getattr(self.peek(),"tipo") == tipo
         print(f"----- actual : {self.peek().tipo} =? {tipo} --> {s}")
-        return self.peek().tipo == tipo
+        return TokenType(self.peek().tipo) == tipo
 
     def isAtEnd(self) -> bool:
         return self.peek().tipo == TokenType.EOF
@@ -51,7 +53,7 @@ class Parser:
         return self.previous()
 
     def error(self,token:Token,msg:str) -> ParseError:
-        #lox.error(token,msg)
+        lox.error(token,msg)
         return self.ParseError(token,msg)
 
     def synchronize():
@@ -215,7 +217,9 @@ def pot(x):
     return x*x
 
 if __name__ == '__main__':
-    pars = Parser([Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"2")])
-    print(f"-- tokens in parser : {pars.tokens}")
+    pars = Parser([Token(0,STRING,"'Hola mundo'"),Token(0,EOF,"")])
+    print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
+    #pars = Parser([Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"2"), Token(0,TokenType.EOF,"")])
+    #print(f"-- tokens in parser : {pars.tokens}")
     expr = pars.parse()
     print(f"-- expr : {expr}")
