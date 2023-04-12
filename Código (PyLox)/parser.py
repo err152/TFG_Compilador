@@ -1,12 +1,13 @@
 import expressions
+from typing import List
 from Token import Token, TokenType
 import re
 
 class Parser:
-    tokens = []
+    tokens: List[Token] = []
     current = 0
 
-    def __init__(self,tokens:[]):
+    def __init__(self,tokens:List[Token]):
         self.tokens = tokens
         
     class ParseError(RuntimeError):
@@ -36,7 +37,7 @@ class Parser:
         print(":::::::: tipo = ", getattr(self.peek(),"tipo"))
         s = getattr(self.peek(),"tipo") == tipo
         print(f"----- actual : {self.peek().tipo} =? {tipo} --> {s}")
-        return TokenType(self.peek().tipo) == tipo
+        return self.peek().tipo == tipo
 
     def isAtEnd(self) -> bool:
         return self.peek().tipo == TokenType.EOF
@@ -217,9 +218,10 @@ def pot(x):
     return x*x
 
 if __name__ == '__main__':
-    pars = Parser([Token(0,STRING,"'Hola mundo'"),Token(0,EOF,"")])
-    print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
+    #pars = Parser([Token(0,TokenType.STRING,"'Hola mundo'"),Token(0,TokenType.EOF,"")])
+    pars = Parser([Token(0,TokenType['STRING'],"'Hola mundo'"),Token(0,TokenType['EOF'],"")])
     #pars = Parser([Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"2"), Token(0,TokenType.EOF,"")])
+    print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
     #print(f"-- tokens in parser : {pars.tokens}")
     expr = pars.parse()
     print(f"-- expr : {expr}")

@@ -30,6 +30,7 @@ class Lox:
         lex = Lexer(source)
         tokens = lex.extrae_tokens()
         print(f"-- tokens : {tokens}")
+        print(f"-- tipo token 1 : {type(tokens[0].tipo)}")
     
         '''
         for token in tokens:

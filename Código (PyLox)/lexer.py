@@ -24,13 +24,14 @@ class Lexer:
             nuevo_estado = self.transicion(estado,caracter,mid)
             if nuevo_estado == 'ERROR':
                 if estado not in ('ESPACIO','NUMBER_','COMMENT_'):
-                    yield Token(self.linea,estado,self.token_actual())
+                    yield Token(self.linea,TokenType[estado],self.token_actual())
                 self.inicio = self.pos
                 estado = 'inicial'
                 
             elif nuevo_estado == 'ESPACIO':
                 if estado not in ('inicial','ERROR','ESPACIO'):
-                    yield Token(self.linea,estado,self.token_actual())
+                    #print(":::::: caracter = ",caracter," estado = ",estado)
+                    yield Token(self.linea,TokenType[estado],self.token_actual())
                 self.inicio = self.pos
                 self.pos += 1
                 estado = nuevo_estado
@@ -40,11 +41,14 @@ class Lexer:
                 estado = nuevo_estado
                 
         if estado not in ('inicial','ERROR','ESPACIO','COMMENT_'):
-            yield Token(self.linea,estado,self.token_actual())
+            yield Token(self.linea,TokenType[estado],self.token_actual())
 
     
     def transicion(self,estado,caracter,mid):
-        if estado == 'inicial' and caracter in SINGLE_CHARS: 
+        #print(" :: transicion :: estado ",estado," caracter ",caracter," mid ",mid)
+        #print(" :://:://:: ",TokenType(caracter).name)
+        if estado == 'inicial' and caracter in SINGLE_CHARS:
+            #print(":::::: single char : ",caracter," es tokenType : ",TokenType(caracter).name)
             return TokenType(caracter).name
 
         elif estado == 'inicial' and caracter in MULTI_CHARS: 
@@ -61,6 +65,10 @@ class Lexer:
             midd = self.entrada[self.inicio:self.pos+1]
             if midd == '//':
                 return 'COMMENT_'
+            else:
+                self.pos -=1
+                midd = self.entrada[self.inicio:self.pos+1]
+                return 'SLASH'
             self.pos -= 1
 
         elif estado == 'COMMENT_':
@@ -70,7 +78,7 @@ class Lexer:
             else:
                 return 'COMMENT_'
 
-        elif estado not in ('STRING_','NUMBER_','IDENTIFICADOR') and (caracter.isspace()
+        elif estado not in ('STRING_','NUMBER_','IDENTIFIER') and (caracter.isspace()
                                            or caracter == '\n'): 
             if caracter == '\n':
                 self.linea += 1
@@ -102,12 +110,12 @@ class Lexer:
             else:
                 return 'ERROR'
 
-        elif estado in  ('IDENTIFICADOR','inicial') and caracter.isalnum() or caracter == '_':
+        elif estado in  ('IDENTIFIER','inicial') and caracter.isalnum() or caracter == '_':
             midd = self.entrada[self.inicio:self.pos+1]
             if midd in KEYWORDS:
                 return TokenType(midd).name
             
-            return 'IDENTIFICADOR'
+            return 'IDENTIFIER'
 
         else:
             return 'ERROR'
@@ -116,7 +124,7 @@ class Lexer:
         l = []
         for i in self.devolver_tokens():
             l.append(i)
-        l.append(Token(self.linea,'EOF',""))
+        l.append(Token(self.linea,TokenType['EOF'],""))
         return l
 
             
