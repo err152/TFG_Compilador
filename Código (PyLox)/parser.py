@@ -16,16 +16,16 @@ class Parser:
             self.token=token
 
     def match(self,*types:TokenType) -> bool:
-        print("--- Dentro match:")
+        #print("--- Dentro match:")
         for tipo in types:
             if type(tipo) is list:
                 for i in tipo:
                     if self.check(i):
-                        print(f"----- tip : {i}")
+                        #print(f"----- tip : {i}")
                         self.advance()
                         return True
             elif self.check(tipo):
-                print(f"----- tipo : {tipo}")
+                #print(f"----- tipo : {tipo}")
                 self.advance()
                 return True
         return False
@@ -33,10 +33,10 @@ class Parser:
     def check(self,tipo:TokenType) -> bool:
         if self.isAtEnd():
             return False
-        print("----- tipo ::: ",type(self.peek().tipo))
-        print(":::::::: tipo = ", getattr(self.peek(),"tipo"))
+        #print("----- tipo ::: ",type(self.peek().tipo))
+        #print(":::::::: tipo = ", getattr(self.peek(),"tipo"))
         s = getattr(self.peek(),"tipo") == tipo
-        print(f"----- actual : {self.peek().tipo} =? {tipo} --> {s}")
+        #print(f"----- actual : {self.peek().tipo} =? {tipo} --> {s}")
         return self.peek().tipo == tipo
 
     def isAtEnd(self) -> bool:
@@ -114,7 +114,7 @@ class Parser:
             right = self.expression()
             expr = expressions.Binary(expr,operator,right)
 
-        print(f"BINARYOP : {expr}")
+        #print(f"BINARYOP : {expr}")
         return expr
 
     def factor(self) -> expressions.Expr:
@@ -156,7 +156,7 @@ class Parser:
     '''
     
     def parse(self) -> expressions.Expr:
-        print(self.tokens)
+        #print(self.tokens)
         try:
             return self.expression()
         except self.ParseError:
@@ -221,7 +221,7 @@ if __name__ == '__main__':
     #pars = Parser([Token(0,TokenType.STRING,"'Hola mundo'"),Token(0,TokenType.EOF,"")])
     pars = Parser([Token(0,TokenType['STRING'],"'Hola mundo'"),Token(0,TokenType['EOF'],"")])
     #pars = Parser([Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"2"), Token(0,TokenType.EOF,"")])
-    print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
+    #print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
     #print(f"-- tokens in parser : {pars.tokens}")
     expr = pars.parse()
     print(f"-- expr : {expr}")

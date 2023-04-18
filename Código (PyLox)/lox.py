@@ -29,8 +29,8 @@ class Lox:
     def run(source:str):
         lex = Lexer(source)
         tokens = lex.extrae_tokens()
-        print(f"-- tokens : {tokens}")
-        print(f"-- tipo token 1 : {type(tokens[0].tipo)}")
+        #print(f"-- tokens : {tokens}")
+        #print(f"-- tipo token 1 : {type(tokens[0].tipo)}")
     
         '''
         for token in tokens:
@@ -38,10 +38,10 @@ class Lox:
         '''
 
         pars = Parser(tokens)
-        print(f"-- tokens in parser : {pars.tokens}")
+        #print(f"-- tokens in parser : {pars.tokens}")
         expr = pars.parse()
         #stmts = pars.parse()
-        print(f"-- expr : {expr}")
+        #print(f"-- expr : {expr}")
 
         #Lox.interpreter.interpret(expr)
         #Lox.interpreter.interpret(stmts)

@@ -2,8 +2,6 @@
 
 #### Mi resumen: por Eduardo del Rio Ruiz
 
-
-
 ## 1. Introducción
 
 Se va a crear un interprete de un lenguaje de programación llamado Lox, un "lenguaje de dominio específico". A priori, programar un idioma es un tarea muy compleja que iremos resolviendo poco a poco.
@@ -20,10 +18,6 @@ Al final de cada capítulo tendremos ejercicios presentados como retos para ampl
 A diferencia del libro, yo implementaré el interprete plox en python, en vez de en java o en C.
 
 ------
-
-
-
-
 
 ## 2. Mapa de del Territorio
 
@@ -46,15 +40,11 @@ Un '**lexer**' toma un flujo de caracteres y lo transforma en una serie de '**to
 
 ![image-20220403202134336](C:\Users\Eduardo\AppData\Roaming\Typora\typora-user-images\image-20220403202134336.png)
 
-
-
 #### Parsing
 
 Aquí nuestra sintaxis toma una gramática. Un '**parser**' toma una secuencia de tokens y crea una estructura en árbol (parse tree/abstract syntax tree) que imita la naturaleza anidada de una gramática. En esta parte se reportan los '**syntax errors**' o errores de sintaxis.
 
 ![image-20220403202143315](C:\Users\Eduardo\AppData\Roaming\Typora\typora-user-images\image-20220403202143315.png)
-
-
 
 #### Análisis Estático¿?
 
@@ -68,48 +58,32 @@ La información se puede almacenar como **atributo** en el arbol sintáctico; en
 
 Hasta aquí el *front end* del interprete.
 
-
-
 #### Representación Intermedia
 
 Representación de nuestro interprete entre el front end y back end, que nos permite el soporte de multiples lenguajes fuente, creando un front end para cada lenguaje, un back end para cada lenguaje y luego conectandolos a gusto.
-
-
 
 #### Optimization
 
 Optimizar el código. Ejemplo '**constant folding**': remplazar la inicialización de una variable como operación de constantes por el valor de la operación.
 
-
-
 #### Generación de Código
 
 Comienza el *back end*. Transformamos el código fuente en código máquina poco a poco, teniendo en dónde deseamos ejecutar nuestro programa. El código generado para correr en una VM se denomina '**bytecode**'.
-
-
 
 #### Máquina Virtual
 
 Todavía falta generar desde el bytecode el código máquina para que sea ejecutado por el chipset específico de la máquina en cuestión.
 
-
-
 #### Runtime
 
 Hora de ejecutar el programa y ver el resultado final!
 
-
-
-
-
 Tenemos 3 rutas alternativas:
 
--  Single-pass compilers: entrelaza parsing, analisis y generación de código generando código ejecutable directamente desde el parser.
+- Single-pass compilers: entrelaza parsing, analisis y generación de código generando código ejecutable directamente desde el parser.
 - Tree-walk interpreters: ejecuta codigo justo despues del parsing, recorriendo el árbol sintáctico rama por rama y hoja por hoja linealmente.
 - Transpilers: a la hora de 'bajar de nivel' a nuestro código podemos tratar de generar un código homólogo en otro idioma de alto lenguaje distinto, y utilizar las herramientas de compilación ya existentes de este para generar el código máquina.
 - JIT:
-
-
 
 #### Compiladores e Interpretes
 
@@ -118,8 +92,6 @@ Compilar es una técnica de implementación que trata de traducir un lenguaje fu
 Un intérprete además de traducir el lenguaje lo ejecuta.
 
 ------
-
-
 
 ## 3. El lenguaje Lox
 
@@ -142,16 +114,15 @@ Como tipos de datos tenemos:
 Expresiones:
 
 - **Aritméticas**: sólo aplicables a números
-     - Operaciones binarias: x+y, x-y, x*y, x/y
-     - Operaciones no binarias: -x
+  
+  - Operaciones binarias: x+y, x-y, x*y, x/y
+  - Operaciones no binarias: -x
 
 - **Comparación e igualdad**:
-
+  
   - Comparación: x<y, x<=y, x>y, x>=y (solo números) 
-
+  
   - Igualdad: x == y, "x" != "y", x == "y"
-
-    
 
 - **Operadores Lógicos**: ! , and, or+
 
@@ -235,12 +206,12 @@ Por que un lenguaje orientado a objetos? La mayoría del código que circula por
 
 ```c++
 class Breakfast {
-	cook() {
-		print "Eggs a-fryin'!";
-	}
-	serve(who) {
-		print "Enjoy your breakfast, " + who + ".";
-	}
+    cook() {
+        print "Eggs a-fryin'!";
+    }
+    serve(who) {
+        print "Enjoy your breakfast, " + who + ".";
+    }
 }
 ```
 
@@ -257,11 +228,11 @@ Y para acceder a estas propiedades desde dentro de un método utiliza el *this* 
 
 ```c++
 class Breakfast {
-	serve(who) {
-		print "Enjoy your " + this.meat + " and " +
-		this.bread + ", " + who + ".";
-	}
-	// ...
+    serve(who) {
+        print "Enjoy your " + this.meat + " and " +
+        this.bread + ", " + who + ".";
+    }
+    // ...
 }
 ```
 
@@ -271,9 +242,9 @@ Herencia singular mediante el operador '<'
 
 ```c++
 class Brunch < Breakfast {
-	drink() {
-		print "How about a Bloody Mary?";
-	}
+    drink() {
+        print "How about a Bloody Mary?";
+    }
 }
 
 var benedict = Brunch("ham", "English muffin");
@@ -284,16 +255,14 @@ Al igual que en java para el método init utilizamos super :
 
 ```c++
 class Brunch < Breakfast {
-	init(meat, bread, drink) {
-		super.init(meat, bread);
-		this.drink = drink;
-	}
+    init(meat, bread, drink) {
+        super.init(meat, bread);
+        this.drink = drink;
+    }
 }
 ```
 
 ------
-
-
 
 ## 4. Scanning
 
@@ -311,7 +280,7 @@ class Token:
         self.linea = linea
         self.tipo = tipo
         self.valor = valor
-        
+
     def __repr__(self):
         return f'[{self.linea},"{self.tipo}",{self.valor}]'
 
@@ -409,18 +378,18 @@ class Lexer:
                     yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 estado = 'inicial'
-                
+
             elif nuevo_estado == 'ESPACIO':
                 if estado not in ('inicial','ERROR','ESPACIO'):
                     yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 self.pos += 1
                 estado = nuevo_estado
-                
+
             else:
                 self.pos += 1
                 estado = nuevo_estado
-                
+
         if estado not in ('inicial','ERROR','ESPACIO'):
             yield Token(self.linea,estado,self.token_actual())
 
@@ -445,7 +414,7 @@ class Lexer:
 
         elif estado == 'inicial' and (caracter == '"' or caracter == "'"):
             return 'STRING_'
-            
+
         elif estado == 'STRING_':
             if caracter == '"' or caracter == "'":
                 return 'STRING'
@@ -460,7 +429,7 @@ class Lexer:
                 return 'NUMERO'
             elif caracter == '.':
                 return 'NUMERO_'
-            
+
         elif estado == 'NUMERO_':
             if caracter.isdigit():
                 return 'NUMERO'
@@ -471,7 +440,7 @@ class Lexer:
             midd = self.entrada[self.inicio:self.pos+1]
             if midd in KEYWORDS:
                 return TokenType(midd).name
-            
+
             return 'IDENTIFICADOR'
 
         else:
@@ -483,8 +452,6 @@ Este programa cuenta con unos atributos llamados pos, inicio y linea que respect
 En la función devuelve_token se avanza caracter a caracter aumentando pos hasta reconocer que ha terminado el token llamando a la funcion transición en cada iteración, devolviendo los caracteres del inicio hasta la posicion actual, junto a la linea (que también irá aumentando según se lea el caracter \n).
 
 La función transición es la que se encarga de ir reconociendo los caracteres e interpretarlos como los distintos tipos de tokens que tenemos, comprobando el caracter actual o los leídos desde el inicio hasta la posición actual, y devolviendo el tipo de Token en forma de string.
-
-
 
 ## 5. Representando el código
 
@@ -498,7 +465,7 @@ Donde A es la **cabeza** y esta se transforma en el **cuerpo** Bc siendo B una *
 
 En nuestra notación también se utilizarán los siguientes simbolos:
 
-- A → b | c | d ;	Funcionando el símbolo '|' como un OR.
+- A → b | c | d ;    Funcionando el símbolo '|' como un OR.
 - A → (b | c) d ;    Los paréntesis dan prioridad de elección al grupo que rodean.
 - A → B B* ;    El símbolo '*' indica que la variable a la que sigue se puede repetir entre 0 e infinitas veces. De esta forma logramos recursión.
 - A → B+ ;    El símbolo '*' indica que la variable a la que sigue se puede repetir entre 1 e infinitas veces. De esta forma logramos recursión.
@@ -514,17 +481,15 @@ En nuestra gramática para el lenguaje Lox se definen de comienzo las siguientes
 Esta sería nuestra gramática resultante:
 
 expression → literal
-					| unary
-					| binary
-					| grouping ;
+                    | unary
+                    | binary
+                    | grouping ;
 literal → NUMBER | STRING | "true" | "false" | "nil" ;
 grouping → "(" expression ")" ;
 unary → ( "-" | "!" ) expression ;
 binary → expression operator expression ;
 operator → "==" | "!=" | "<" | "<=" | ">" | ">="
-				| "+" | "-" | "*" | "/" ;
-
-
+                | "+" | "-" | "*" | "/" ;
 
 ## El patrón Visitante
 
@@ -532,5 +497,58 @@ Este patrón funciona de manera que teniendo dos subclases 'B' y 'C' que extiend
 
 Esto se conoce como polimorfismo, definido como la capacidad de llamar a objetos de distintos tipos con la misma sintaxis.
 
+...........…
+.............
 
+## 8. Declaraciones y estados
 
+### 8.1 Declaraciones
+
+Se añadirán 'declaraciones' a la gramática de Lox, comenzando por las dos más simples:
+
+- La declaración de una expresión, que permite utilizar una expresión dónde se esperaría una declaración, y nos permite evaluar expresiones con efectos secundarios.
+- Print, que evalua una expresión y la muestra al usuario.
+
+La nueva sintaxis conlleva nuevas reglas gramáticas:
+_program → statement* EOF ;
+
+statement → exprStmt
+                | printStmt ;
+
+exprStmt →  expression ";" ;
+printStmt → "print" expression ";" ;_
+
+Ahora la primera regla es 'programa' que abarca un script de lox completo terminando en 'EOF'.
+
+Se modifica GenerateAst / metaExpr para que metaprograme en un nuevo fichero 'statements.py' las distintas declaraciones al igual que lo hacía con las expresiones.
+
+Ahora se modifica el método 'parse' del parser, y creamos uno nuevo llamado 'statement', que devuelve una declaracion print si coincide con lo que lee o una declaración de una expresion en su defecto.
+
+Al contrario de la expresiones, las declaracions no producen valores si no vacío. Se añaden en el intérprete las clases visitantes para estas declaraciones que se han creado. Se modifica el método 'interpret' para que interprete declaraciones y se crea el método 'execute' para validar a estas.
+Por último, se modifica la clase Lox, más específicamente el 'run' para que parsee declaraciones en vez de una sola expresion.
+
+### 8.2 Variables globales
+
+Crearemos dos nuevos contructos:
+
+- Una declaracion de una variable, lo que crea la variable.
+- Una expression variable, la cual accede a dicha variable.
+
+Se modifica una vez más la gramática
+
+_program → declaration* EOF ;
+
+declaration → varDecl
+                | statement ;
+
+varDecl → "var" IDENTIFIER ( "=" expression )? ";" ;
+
+statement → exprStmt
+                | printStmt ;
+
+primary → "true" | "false" | "nil"
+                | NUMBER | STRING
+                | "(" expression ")"
+                | IDENTIFIER ;_
+
+Se modifica el fichero metaExpr para que agregue estas variables tanto a expressions como a statements.
