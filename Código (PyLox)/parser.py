@@ -73,7 +73,7 @@ class Parser:
             self.advance()
 
     def consume(self,tipo:TokenType,msg:str) -> Token:
-        if check(tipo):
+        if self.check(tipo):
             return self.advance()
     
         raise self.error(self.peek(),msg)
@@ -90,8 +90,8 @@ class Parser:
             return expressions.Literal(self.previous().valor)
 
         if self.match(TokenType.LEFT_PAREN):
-            expr = expression()
-            consume(TokenType.RIGHT_PAREN,"Expect ')' after expression.")
+            expr = self.expression()
+            self.consume(TokenType.RIGHT_PAREN,"Expect ')' after expression.")
             return expressions.Grouping(expr)
 
         self.error(self.peek(),"Expect expression.")
