@@ -8,6 +8,12 @@ Scanning/Representando el Codigo/Parsing Expressions
 
 Este es el primer paso de cualquier intérprete. El scanner toma un código fuente como una serie de caracteres y los agrupa en lo que llamamos **lexemas**, los cuales tratados como información de un tipo concreto y en un contexto se convierten en **tokens**.
 
+#### 4.1. Framework
+
+Antes que nada se desarrolla una primera versión del interprete. Se crea para ello un programa al que llamamos Lox.py el cual será el encargado de leer el programa en lenguaje Lox como cadena de caracteres y llamar a las distintas partes de nuestro Interprete. Este acepta el código de 3 maneras distintas: por terminal como parámetro, interactivamente por el terminal si no se le pasa ningún parámetro, o pasándole una ruta al fichero en el que se encuentre el código a procesar. Además este contará con una simple gestión de errores.
+
+#### 4.2. Lexemas y Tokens
+
 Se definen 3 tipos de token: IDENTIFICADOR, NUMERO, STRING
 
 Además de palabras clave como operadores lógicos, funciones internas, o caracteres especiales.
@@ -89,6 +95,12 @@ MULTI_CHARS: Tuple[str] = ('!', '!=', '=', '==', '>', '>=', '<', '<=')
 ```
 
 Los tokens son tuplas compuestas de un número de línea, el tipo al que pertenecen y un valor dentro del tipo. Se definen todos los caracteres posibles bajo su nombre de tipo para poder utilizarlos a gusto en le resto del código.
+
+#### 4.3. Lenguajes Regulares
+
+Comentar movidas de regex?
+
+#### 4.4. Clase Lexer
 
 Una vez definidos, ahora dada una cadena de caracteres debemos desarrollar un programa **lexer.py** que lea caracter a caracter y vaya identificando los distintos tipos de tokens según avance.
 
@@ -231,13 +243,102 @@ binary → expression operator expression ;
 operator → "==" | "!=" | "<" | "<=" | ">" | ">="
                 | "+" | "-" | "*" | "/" ;
 
-## El patrón Visitante
+#### 5.2. Implementando Arboles Sintácticos
+
+Para esto lo primero que se necesita es crear una clase Expr en la que definiremos los distintos tipos de expresiones. Dado que es una tarea bastante robótica, se ha utilizado metaprogramación para generar el fichero expresiones.py que contendrá estas mismas.
+
+Hablar de metaprogramación
+
+Para ello se desarrolla el programa metaExpr que pasada una lista con los distintos tipos de expresiones y sus atributos, genera un fichero en el que define todas las expresiones como es necesario.
+
+Hablar del "expression problem"
+
+#### 5.3. El patrón Visitante
 
 Este patrón funciona de manera que teniendo dos subclases 'B' y 'C' que extienden a otra clase principal 'A', se crea una interfaz 'visitaBC' con un nuevo método para cada una de las subclases llamado 'visitaB' y 'visitaC', en la clase 'A' se agrega un método llamado 'acepta', y por último en cada una de las subclases se define este método 'acepta' de forma que se le pase la interfaz 'visitaBC' como parámetro y ahí se elija si 'visitaB' o 'visitaC'. Ahora cuando se desee realizar una operación se llama al método 'acepta' y se le pasa como parámetro el visitante (la interfaz) que se quiera ejecutar.
 
 Esto se conoce como polimorfismo, definido como la capacidad de llamar a objetos de distintos tipos con la misma sintaxis.
 
-...........…
-.............
+#### 5.4. AstPrinter
 
-# 
+Finalmente se crea un programa sencillo que imprime por pantalla estas expresiones de manera más organizada por pantalla, separando operaciones por parentesis.
+
+
+
+## 6. Parsing
+
+La palabra "parse" viene del francés "pars" y significa tomar un texto y un mapear cada palabra en la gramática de un lenguaje. El lenguaje en este caso es Lox no el antiguo francés.
+
+
+
+#### 6.1. Ambigüedad
+
+Cuando se *parsea* no solo se determina si el string es código válido para Lox, se está haciendo un seguimiento de qué reglas coinciden con qué partes de este, de manera que se sepa a que parte del lenguaje pertenece dicho token. Se pueden generar dos arboles binarios válidos y distintos pero que  devuelvan un resultado distinto:
+
+<img title="" src="file:///C:/Users/Eduardo/AppData/Roaming/marktext/images/2023-04-19-19-41-44-image.png" alt="" width="201" data-align="center">
+
+Para esto se establecen reglas de precedencia y asociatividad.
+
+- La **precedencia** determina qué operador es evaluado primero en una expresión que contiene una mezcla de distintos operadores.
+
+- La **asociatividad** determina que operador es evaluado primero en una serie del mismo operador.
+  
+  
+
+Se resolverá este problema en Lox utilizando las mismas reglas de precedencia que C, yendo de menor a mayor.
+
+| Name       | Operators | Associates |
+|:----------:|:---------:|:----------:|
+| Equality   | == !=     | Left       |
+| Comparison | > >= < <= | Left       |
+| Term       | - +       | Left       |
+| Factor     | / *       | Left       |
+| Unary      | ! -       | Right      |
+
+La gramática de expresiones resultaría de la siguiente manera:
+
+expression     → equality ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term           → factor ( ( "-" | "+" ) factor )* ;
+factor         → unary ( ( "/" | "*" ) unary )* ;
+unary          → ( "!" | "-" ) unary
+                   | primary ;
+primary        → NUMBER | STRING | "true" | "false" | "nil"
+                   | "(" expression ")" ;
+
+
+
+#### 6.2. Parsing Recursivo Descendente
+
+Para realizar el parser se ha utilizado la técnica de recursion descendente, que se considera top-down empezando por la regla gramatical superior hasta llegar a la última de ellas.
+
+
+
+Creamos la clase Parser la cual tiene como atributos una lista de Tokens que le pasaremos en el constructor como parámetro, y un contador **current** que indica el token en el que nos encontramos actualmente.
+
+A continuación creamos funciones para los distintas reglas de la gramática que se difinió anteriormente. En cada función se llama a la inferior pasandole unos tipos como parámetro. Una vez se llega al nivel más bajo se empieza a comparar el token con estos tipos, si coinciden se devuelve la expresion en la que se encuentra en ese instante, si no coincide sube al la regla superior y compara con los siguientes tipos. Así hasta que el token coincide con alguno de los tipos, en caso contrario devuelve un error.
+
+Esto lo hace con cada uno de los tokens contenidos en su lista tokens, avanzando al siguiente según va identificando las expresiones.
+
+
+
+#### 6.3. Errores de Sintáxis
+
+Un parser tiene dos tareas:
+
+- Dada una secuencia válida de tokens, procudir el árbol sintáctico correspondiente.
+
+- Dada una secuencia no válida de tokens, detectar cualquier error y comunicar al usuario de su fallo.
+
+En este caso utilizaremos la técnicas de recuperación **panic mode**. Una vez se detecta un error se entra en modo pánico, se para la ejecución y se espera una sincronización.
+
+De momento esta sincronización no se utiliza, así que los errores pararán el programa mostrando un mensaje por pantalla.
+
+
+
+#### 6.4. Conectando el Parser
+
+Finalmente se crea una función parse() que llama a la función expresión que analizará todos los tokens encapsulada en un catch que detecte ParseErrors. 
+
+Se añade en la función run() de la clase Lox() la llamada la creación del parser con el resultado que nos devuleve el lexer y se llama a este último método.
