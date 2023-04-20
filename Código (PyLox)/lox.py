@@ -3,7 +3,7 @@ from sys import argv
 
 from parser import Parser
 from lexer import Lexer
-#from Interprete import Interprete,LoxRuntimeError
+from Interprete import Interprete,LoxRuntimeError
 from Token import Token,TokenType
 import AstPrinter
 
@@ -41,9 +41,9 @@ class Lox:
         #print(f"-- tokens in parser : {pars.tokens}")
         expr = pars.parse()
         #stmts = pars.parse()
-        #print(f"-- expr : {expr}")
-
-        #Lox.interpreter.interpret(expr)
+        
+        inter = Interprete()
+        inter.interpret(expr)
         #Lox.interpreter.interpret(stmts)
     
         print(AstPrinter.AstPrinter().print(expr))

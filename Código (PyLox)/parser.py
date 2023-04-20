@@ -54,7 +54,6 @@ class Parser:
         return self.previous()
 
     def error(self,token:Token,msg:str) -> ParseError:
-        lox.error(token,msg)
         return self.ParseError(token,msg)
 
     def synchronize():
@@ -98,8 +97,8 @@ class Parser:
     
     def unary(self) -> expressions.Expr:
         if self.match(TokenType.BANG,TokenType.MINUS):
-            operator = previous()
-            right = unary()
+            operator = self.previous()
+            right = self.unary()
             return expressions.Unary(operator,right)
     
         return self.primary()
