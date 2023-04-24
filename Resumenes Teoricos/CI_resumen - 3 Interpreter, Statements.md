@@ -8,8 +8,6 @@ Evaluando Expresiones/Declaraciones y Estados/Control de Flujo
 
  Ahora mismo el parser solo soporta las expresiones. Para ejecutar código se evaluará la expresion y se producirá un valor. Por cada exrpesión sintáctica que se puede parsear se necesitará un trozo de código que sepa como evaluar ese arbol produciendo un resultado.
 
-
-
 #### 7.1. Representar los valores
 
 Para representar los valores de cada tipo se necesitará una clase correspondiente en python:
@@ -36,8 +34,6 @@ Para esto se reutilizará el patrón de visitante. Creamos una nueva clase Inter
 
 - Binarias: se devuelven las operaciones aritméticas y comparaciones lógicas correspondientes. Para el más definimos un resultado en caso de que la suma sea de strings. Para las igualdades creamos otra función isEqual() que compare en caso de no ser números que compruebe si ambos son null o no.
 
-
-
 #### 7.3. Runtime Errors
 
 Hasta ahora los errores controlados eran estáticos o sintácticos, pero ahora necesitamos controlar los errores en tiempo de ejecución. Estos se dan cuando pasamos tipos de dato no válido a nuestras operaciones. En este momento, el programa se detendría y mostraría un error en pantalla, pero esto no es lo que se quiere.
@@ -46,13 +42,9 @@ Para esto en la misma clase Interprete se crean funciones que comprueben el tipo
 
 Hecho esto, se llama a estas funciones en todas nuestras expresiones antes de operar un resultado.
 
-
-
 #### 7.4. Conectando el Intérprete
 
 Finalmente se crea una fución interpret y stringify() para evaluar las expresiones y mostrar el resultado por pantalla. Se añade el Interprete y su llamada al programa principal Lox y se prueba su funcionamiento.
-
-
 
 ## 8. Declaraciones y Estados
 

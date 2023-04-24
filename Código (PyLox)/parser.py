@@ -1,4 +1,7 @@
+from expressions import Expr
 import expressions
+from statements import Stmt, Print
+import statements
 from typing import List
 from Token import Token, TokenType
 import re
@@ -16,16 +19,13 @@ class Parser:
             self.token=token
 
     def match(self,*types:TokenType) -> bool:
-        #print("--- Dentro match:")
         for tipo in types:
             if type(tipo) is list:
                 for i in tipo:
                     if self.check(i):
-                        #print(f"----- tip : {i}")
                         self.advance()
                         return True
             elif self.check(tipo):
-                #print(f"----- tipo : {tipo}")
                 self.advance()
                 return True
         return False
@@ -33,10 +33,7 @@ class Parser:
     def check(self,tipo:TokenType) -> bool:
         if self.isAtEnd():
             return False
-        #print("----- tipo ::: ",type(self.peek().tipo))
-        #print(":::::::: tipo = ", getattr(self.peek(),"tipo"))
         s = getattr(self.peek(),"tipo") == tipo
-        #print(f"----- actual : {self.peek().tipo} =? {tipo} --> {s}")
         return self.peek().tipo == tipo
 
     def isAtEnd(self) -> bool:
@@ -49,6 +46,7 @@ class Parser:
         return self.tokens[self.current-1]
 
     def advance(self) -> Token:
+        #print("----- ",self.tokens[self.current])
         if self.isAtEnd() == False:
             self.current += 1
         return self.previous()
@@ -77,13 +75,13 @@ class Parser:
     
         raise self.error(self.peek(),msg)
 
-    def primary(self) -> expressions.Expr:
+    def primary(self) -> Expr:
         if self.match(TokenType.FALSE):
-            return expressions.Literal(false)
+            return expressions.Literal(False)
         if self.match(TokenType.TRUE):
-            return expressions.Literal(true)
+            return expressions.Literal(True) # True, true o TRUE ¿?
         if self.match(TokenType.NIL):
-            return expressions.Literal(null)
+            return expressions.Literal(None)
 
         if self.match(TokenType.NUMBER,TokenType.STRING):
             return expressions.Literal(self.previous().valor)
@@ -95,7 +93,7 @@ class Parser:
 
         self.error(self.peek(),"Expect expression.")
     
-    def unary(self) -> expressions.Expr:
+    def unary(self) -> Expr:
         if self.match(TokenType.BANG,TokenType.MINUS):
             operator = self.previous()
             right = self.unary()
@@ -103,7 +101,7 @@ class Parser:
     
         return self.primary()
 
-    def binary_op(self,func,tipos) -> expressions.Expr:
+    def binary_op(self,func,tipos) -> Expr:
         expr = func
 
         while self.match(tipos):
@@ -113,47 +111,49 @@ class Parser:
             right = self.expression()
             expr = expressions.Binary(expr,operator,right)
 
-        #print(f"BINARYOP : {expr}")
         return expr
 
-    def factor(self) -> expressions.Expr:
+    def factor(self) -> Expr:
         tipos = [TokenType.SLASH,TokenType.STAR]
         return self.binary_op(self.unary(),tipos)
 
-    def term(self) -> expressions.Expr:
+    def term(self) -> Expr:
         tipos = [TokenType.MINUS,TokenType.PLUS]
         return self.binary_op(self.factor(),tipos)
 
-    def comparison(self) -> expressions.Expr:
+    def comparison(self) -> Expr:
         tipos = [TokenType.GREATER,TokenType.GREATER_EQUAL,TokenType.LESS,TokenType.LESS_EQUAL]
         return self.binary_op(self.term(),tipos)
 
-    def equality(self) -> expressions.Expr:
+    def equality(self) -> Expr:
         tipos = [TokenType.BANG_EQUAL,TokenType.EQUAL_EQUAL]
         return self.binary_op(self.comparison(),tipos)
 
-    def expression(self) -> expressions.Expr:
+    def expression(self) -> Expr:
         return self.equality()
     
     # Modificación post-Statements
-    '''
-    def statement(self) -> statements.Stmt:
-        if match(PRINT):
+    
+    def statement(self) -> Stmt:
+        #print("selfffff - ",self)
+        if self.match(TokenType.PRINT):
             return self.printStatement()
         
         return self.expressionStatement()
 
-    def printStatement(self) -> statements.Stmt:
+    def printStatement(self) -> Stmt:
+        #print("PRINT statement")
         value = self.expression()
-        consume(TokenType.SEMICOLON,"Expect ';' after value.")
-        return statements.Stmt.Print(value)
+        self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
+        return statements.Print(value)
 
-    def expressionStatement(self) -> statements.Stmt:
+    def expressionStatement(self) -> Stmt:
+        #print("EXPR statement")
         expr = self.expression()
-        consume(TokenType.SEMICOLON,"Expect ';' after value.")
-        return statements.Stmt.Expression(expr)
-    '''
+        self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
+        return statements.Expression(expr)
     
+    '''
     def parse(self) -> expressions.Expr:
         #print(self.tokens)
         try:
@@ -163,13 +163,14 @@ class Parser:
    
     # Parser post-Statements
     '''
-    def parse(self) -> *statements.Stmt:
-        statements = []
-        while not isAtEnd():
-            statements.append(self.statement())
+    
+    def parse(self) -> List[Stmt]:
+        stmts : List[statements.Stmt] = []
+        while not self.isAtEnd():
+            stmts.append(self.statement())
 
-        return statements
-    '''
+        return stmts
+    
 
 '''
 def comparison(self) -> expressions.Expr:
@@ -218,9 +219,10 @@ def pot(x):
 
 if __name__ == '__main__':
     #pars = Parser([Token(0,TokenType.STRING,"'Hola mundo'"),Token(0,TokenType.EOF,"")])
-    pars = Parser([Token(0,TokenType['STRING'],"'Hola mundo'"),Token(0,TokenType['EOF'],"")])
+    pars = Parser([Token(0,TokenType['STRING'],"'Hola mundo'"), Token(0,TokenType['SEMICOLON'],";"),Token(0,TokenType['EOF'],"")])
     #pars = Parser([Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"2"), Token(0,TokenType.EOF,"")])
     #print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
     #print(f"-- tokens in parser : {pars.tokens}")
     expr = pars.parse()
     print(f"-- expr : {expr}")
+

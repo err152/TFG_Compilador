@@ -129,7 +129,7 @@ class Lexer:
 
             
 if __name__ == '__main__':
-    a = Lexer('''1+2''')
+    a = Lexer('''true''')
     b = str(a.extrae_tokens())
     print(b)
     #a = Lexer('"espacio " 32 \ne2p4c10 ')

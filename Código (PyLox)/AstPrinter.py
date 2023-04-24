@@ -1,7 +1,7 @@
 import expressions
 from Token import Token, TokenType
 
-class AstPrinter(expressions.Visitor):
+class AstPrinter(expressions.ExprVisitor):
    
    def print(self, expr:expressions.Expr) -> str:
       return expr.acepta(self)

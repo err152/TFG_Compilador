@@ -1,6 +1,7 @@
 from Token import Token,TokenType
+from typing import List
 import expressions
-#import statements
+import statements
 
 class LoxRuntimeError(RuntimeError):
    token = None
@@ -9,7 +10,7 @@ class LoxRuntimeError(RuntimeError):
       super().__init__(msg)
       self.token = token
 
-class Interprete(expressions.Visitor): #,statements.Visitor
+class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def stringify(self, obj:any) -> str:
       if obj == None:
@@ -21,6 +22,7 @@ class Interprete(expressions.Visitor): #,statements.Visitor
          return text
       return str(obj)
 
+   '''
    def interpret(self,expression:expressions.Expr):
       try:
          value = self.evaluate(expression)
@@ -29,19 +31,19 @@ class Interprete(expressions.Visitor): #,statements.Visitor
          print(error)
       #except error:
          #print("Lox.runtimeError") # Provisional
-         
+   ''' 
    # Modificación post-Statements
-   '''
-   def interpret(self,statements:statements.Stmt):
+   
+   def interpret(self,statements:List[statements.Stmt]):
       try:
          for statement in statements:
             self.execute(statement)
       except RuntimeError as error:
          Lox.runtimeError(error)
-   '''
+   
 
    def check_number_operand(self, operator: Token, operand: any):
-      print("operator : ",operator," operand : ",operand)
+      #print("operator : ",operator," operand : ",operand)
       if self.is_number(operand):
          return
       raise LoxRuntimeError(operator,"Operand must be a number.")
@@ -55,7 +57,7 @@ class Interprete(expressions.Visitor): #,statements.Visitor
       return a == b
 
    def is_number(self, obj: any) -> bool:
-      print("::::::: obj = ",obj," de tipo ",type(obj))
+      #print("::::::: obj = ",obj," de tipo ",type(obj))
       try:
          float(obj)
          return True
@@ -70,19 +72,21 @@ class Interprete(expressions.Visitor): #,statements.Visitor
       return expr.acepta(self)
 
    # Modificacion post_Statements
-   '''
+   
    def execute(self,stmt: statements.Stmt):
-      stmt.accept(self)
+      stmt.acepta(self)
 
    def visit_expression_stmt(self,stmt: statements.Expression):
-      evaluate(stmt.expression)
+      #print("dentro visit_expression_stmt")
+      value = self.evaluate(stmt.expression)
       return None
 
    def visit_print_stmt(self,stmt: statements.Print):
-      value = evaluate(stmt.expression)
+      #print("Dentro visit_print_stmt")
+      value = self.evaluate(stmt.expression)
       print(self.stringify(value))
       return None
-      '''
+   
 
    def visit_literal_expr(self,expr: expressions.Literal):
       return expr.value
@@ -92,11 +96,11 @@ class Interprete(expressions.Visitor): #,statements.Visitor
 
    def visit_unary_expr(self, expr: expressions.Unary):
       right = self.evaluate(expr.right)
-      print("::: right = ",right,type(right))
+      #print("::: right = ",right,type(right))
 
       match expr.operator.tipo:
          case TokenType.MINUS:
-            print("operator : ",expr.operator)
+            #print("operator : ",expr.operator)
             self.check_number_operand(expr.operator,right)
             return -float(right)
          case TokenType.BANG:
@@ -107,9 +111,9 @@ class Interprete(expressions.Visitor): #,statements.Visitor
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)
-      print("::: left = ",left)
+      #print("::: left = ",left)
       right = self.evaluate(expr.right)
-      print("::: right = ",right)
+      #print("::: right = ",right)
 
       match expr.operator.tipo:
          case TokenType.BANG_EQUAL:

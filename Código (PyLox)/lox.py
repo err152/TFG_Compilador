@@ -39,14 +39,16 @@ class Lox:
 
         pars = Parser(tokens)
         #print(f"-- tokens in parser : {pars.tokens}")
-        expr = pars.parse()
-        #stmts = pars.parse()
+        #expr = pars.parse()
+        stmts = pars.parse()
+
+        #print(AstPrinter.AstPrinter().print(expr))
+        #print("statements :: ",stmts)
         
         inter = Interprete()
-        inter.interpret(expr)
+        inter.interpret(stmts)
         #Lox.interpreter.interpret(stmts)
     
-        print(AstPrinter.AstPrinter().print(expr))
 
     def runFile(path:str):
         data = path.read_text(encoding='utf-8',errors='strict')

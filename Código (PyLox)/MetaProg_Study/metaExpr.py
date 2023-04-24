@@ -11,13 +11,16 @@ def defineAst(self, outputDir:str, baseName:str, types:[]):
     with open(path,'w')as f:
         f.write("from Token import Token" + "\n")
         f.write("from typing import Any" + "\n")
-        f.write("from abc import ABC, abstractmethod" + "\n\n")
+        f.write("from abc import ABC, abstractmethod" + "\n")
+        if baseName == "Stmt":
+            f.write("from expressions import Expr"+"\n")
+        f.write("\n")
 
         defineVisitor(self,f,baseName,types)
         
         f.write("class " + baseName + "(ABC):" + "\n")
         f.write("   @abstractmethod"+"\n")
-        f.write("   def acepta(Visitor):"+"\n")
+        f.write("   def acepta("+baseName+"Visitor):"+"\n")
         f.write("       pass"+"\n\n")
 
         for tipe in types:
@@ -27,7 +30,7 @@ def defineAst(self, outputDir:str, baseName:str, types:[]):
  
 
 def defineVisitor(self, f, baseName:str, types:[]):
-    f.write("class Visitor(ABC):"+"\n")
+    f.write("class "+baseName+"Visitor(ABC):"+"\n")
 
     for tipe in types:
         typeName = tipe.split(":")[0].strip()
@@ -57,7 +60,7 @@ def defineType(self, f, baseName:str, className:str, fieldList:str):
         f.write("       self." + name + " = " + name + "\n")
 
     # define acepta method
-    f.write("\n   " + "def acepta(self, visitor: Visitor):" + "\n")
+    f.write("\n   " + "def acepta(self, visitor: "+baseName+"Visitor):" + "\n")
     f.write("       return visitor.visit_"+className.lower()+"_"+baseName.lower()+"(self)"+"\n")
     
     f.write("\n")
