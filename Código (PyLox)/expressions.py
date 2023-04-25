@@ -8,6 +8,10 @@ class ExprVisitor(ABC):
        pass
 
    @abstractmethod
+   def visit_assign_expr(self, expr: 'Expr'):
+       pass
+
+   @abstractmethod
    def visit_grouping_expr(self, expr: 'Expr'):
        pass
 
@@ -19,11 +23,10 @@ class ExprVisitor(ABC):
    def visit_unary_expr(self, expr: 'Expr'):
        pass
 
-   '''
    @abstractmethod
    def visit_variable_expr(self, expr: 'Expr'):
        pass
-   '''
+
 
 class Expr(ABC):
    @abstractmethod
@@ -38,6 +41,14 @@ class Binary(Expr):
 
    def acepta(self, visitor: ExprVisitor):
        return visitor.visit_binary_expr(self)
+
+class Assign(Expr):
+   def __init__(self,name:Token,value:Expr):
+       self.name = name
+       self.value = value
+
+   def acepta(self, visitor: ExprVisitor):
+       return visitor.visit_assign_expr(self)
 
 class Grouping(Expr):
    def __init__(self,expression:Expr):

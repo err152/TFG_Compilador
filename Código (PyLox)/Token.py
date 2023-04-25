@@ -70,7 +70,7 @@ class Token:
 
 _keywords: Tuple[str] = (
     'true','false','nil','and','or','if','else','fun','return','for','class',
-    'super','this','while','print'
+    'super','this','while','print','var'
     )
 
 KEYWORDS: Dict[str,TokenType] = {key: TokenType(key) for key in _keywords}

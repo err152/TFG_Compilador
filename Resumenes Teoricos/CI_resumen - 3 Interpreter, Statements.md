@@ -48,7 +48,7 @@ Finalmente se crea una fución interpret y stringify() para evaluar las expresio
 
 ## 8. Declaraciones y Estados
 
-### 8.1 Declaraciones
+#### 8.1 Declaraciones
 
 Se añadirán 'declaraciones' a la gramática de Lox, comenzando por las dos más simples:
 
@@ -73,7 +73,7 @@ Ahora se modifica el método 'parse' del parser, y creamos uno nuevo llamado 'st
 Al contrario de la expresiones, las declaracions no producen valores si no vacío. Se añaden en el intérprete las clases visitantes para estas declaraciones que se han creado. Se modifica el método 'interpret' para que interprete declaraciones y se crea el método 'execute' para validar a estas.
 Por último, se modifica la clase Lox, más específicamente el 'run' para que parsee declaraciones en vez de una sola expresion.
 
-### 8.2 Variables globales
+#### 8.2 Variables globales
 
 Crearemos dos nuevos contructos:
 
@@ -98,3 +98,45 @@ primary → "true" | "false" | "nil"
                 | IDENTIFIER ;_
 
 Se modifica el fichero metaExpr para que agregue estas variables tanto a expressions como a statements.
+
+La método de entrada al parser cambia, ya que el nivel superior del programa ahora es una lista de declaraciones y no expresiones.
+
+Para ello se crea un nuevo método declaration() que conecta con la recuperación de errores realizada anteriormente que no se llegó a utilizar. Este método es un buen punto para sincronizar el parser cuando entre en modo pánico ya que se le llama repetidas veces según se parsea.
+
+Ahora definimos la función varDeclaration() que crea las variables de forma que inicializa la variable como null si no se detecta un token '='.
+
+Finalmente se añade el caso del indentificador al la función primary().
+
+
+
+#### 8.3. Entornos
+
+Las asignaciones que asocian las variables con sus valores deben estar almacenadas en algún sitio. Este sitio se llama entorno (Enviroment).
+
+Se crea una nueva clase Entorno que tendrá como atributo un diccionario con las variables y sus respectivos valores. Se definen las siguientes funciones:
+
+- define(name,value) para añadir las nuevas variables a esta lista.
+
+- get(name) para comprobar si ya existe una variable.
+
+
+
+Volviendo al Interprete, ahora se crea un entorno como atributo de manera que guarde los valores hasta que este termine de ejecutar. 
+
+Dado que se tienen dos nuevos arboles sintacticos se deberán crear dos nuevas funciones visit, una para cada una.
+
+
+
+#### 8.4. Asignación
+
+En Lox se permite la reasignación de las variables. Aquí se presenta un problema y es que la comparación de igualdad está a uno de los niveles más bajos en nuestra gramática. Se tendrá que modificar el parser y añadir una nueva expresión.
+
+Se añade a parser la función assignment() para solucionar este problema.
+
+Ahora se tiene un nuevo nodo en nuestro árbol semántico que se define en el intérprete como visit_assign_expr(expr).
+
+En Entorno se añade assign(name,value).
+
+
+
+#### 8.5. Scope

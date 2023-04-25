@@ -11,12 +11,11 @@ class StmtVisitor(ABC):
    @abstractmethod
    def visit_print_stmt(self, stmt: 'Stmt'):
        pass
-      
-   '''
+
    @abstractmethod
    def visit_var_stmt(self, stmt: 'Stmt'):
        pass
-   '''
+
 
 class Stmt(ABC):
    @abstractmethod

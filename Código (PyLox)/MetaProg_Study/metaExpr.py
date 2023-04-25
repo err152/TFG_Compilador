@@ -72,6 +72,7 @@ class GenerateAst:
         outputDir = args[0]
         
         defineAst(self,outputDir+'/expressions.py',"Expr",["Binary : Expr left, Token operator, Expr right",
+                                "Assign : Token name, Expr value",
                                 "Grouping : Expr expression",
                                 "Literal : Any value",
                                 "Unary : Token operator, Expr right",

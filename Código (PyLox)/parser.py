@@ -46,7 +46,7 @@ class Parser:
         return self.tokens[self.current-1]
 
     def advance(self) -> Token:
-        #print("----- ",self.tokens[self.current])
+        print("----- ",self.tokens[self.current])
         if self.isAtEnd() == False:
             self.current += 1
         return self.previous()
@@ -54,10 +54,10 @@ class Parser:
     def error(self,token:Token,msg:str) -> ParseError:
         return self.ParseError(token,msg)
 
-    def synchronize():
+    def synchronize(self):
         self.advance()
 
-        while self.isAtEnd() == false:
+        while self.isAtEnd() == False:
             if self.previous().tipo == TokenType.SEMICOLON:
                 return
 
@@ -82,10 +82,10 @@ class Parser:
             return expressions.Literal(True) # True, true o TRUE ¿?
         if self.match(TokenType.NIL):
             return expressions.Literal(None)
-
         if self.match(TokenType.NUMBER,TokenType.STRING):
             return expressions.Literal(self.previous().valor)
-
+        if self.match(TokenType.IDENTIFIER):
+            return expressions.Variable(self.previous()) # quizás hace falta .valor ¿?
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN,"Expect ')' after expression.")
@@ -130,7 +130,18 @@ class Parser:
         return self.binary_op(self.comparison(),tipos)
 
     def expression(self) -> Expr:
-        return self.equality()
+        return self.assignment()
+
+    # Global Vars
+
+    def declaration(self) -> Stmt:
+        try:
+            if self.match(TokenType.VAR):
+                return self.varDeclaration()
+            return self.statement()
+        except self.ParseError as e:
+            self.synchronize()
+            return None
     
     # Modificación post-Statements
     
@@ -142,16 +153,44 @@ class Parser:
         return self.expressionStatement()
 
     def printStatement(self) -> Stmt:
-        #print("PRINT statement")
+        print("PRINT statement")
         value = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Print(value)
 
+    def varDeclaration(self) -> Stmt:
+        print(" VAR statement")
+        name : Token = self.consume(TokenType.IDENTIFIER,"Expect variable name.")
+        print("name = ",name)
+        initializer : Expr = None
+        if self.match(TokenType.EQUAL):
+            print("variable inicializada")
+            initializer = self.expression()
+        print("inicializacion a ",initializer)
+
+        self.consume(TokenType.SEMICOLON,"Expect ';' after variable declaration.")
+        return statements.Var(name,initializer)
+
     def expressionStatement(self) -> Stmt:
-        #print("EXPR statement")
+        print("EXPR statement")
         expr = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Expression(expr)
+
+    def assignment(self) -> Expr:
+        expr : Expr = self.equality()
+
+        if self.match(TokenType.EQUAL):
+            equals : Token = self.previous()
+            value : Expr = self.assignment()
+
+            if isinstance(expr,expressions.Variable):
+                name : Token = expressions.Variable(expr.name)
+                return expressions.Assign(name,value)
+
+            self.error(equals,"Invalid assignment target.")
+
+        return expr
     
     '''
     def parse(self) -> expressions.Expr:
@@ -167,7 +206,8 @@ class Parser:
     def parse(self) -> List[Stmt]:
         stmts : List[statements.Stmt] = []
         while not self.isAtEnd():
-            stmts.append(self.statement())
+            #stmts.append(self.statement())
+            stmts.append(self.declaration())
 
         return stmts
     

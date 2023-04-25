@@ -1,4 +1,5 @@
 from Token import Token,TokenType
+from Entorno import Entorno
 from typing import List
 import expressions
 import statements
@@ -12,6 +13,8 @@ class LoxRuntimeError(RuntimeError):
 
 class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
+   ent = Entorno()
+   
    def stringify(self, obj:any) -> str:
       if obj == None:
          return None
@@ -36,6 +39,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    def interpret(self,statements:List[statements.Stmt]):
       try:
+         print("declaraciones :::",statements)
          for statement in statements:
             self.execute(statement)
       except RuntimeError as error:
@@ -74,6 +78,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    # Modificacion post_Statements
    
    def execute(self,stmt: statements.Stmt):
+      print("declaracion ::: ",stmt)
       stmt.acepta(self)
 
    def visit_expression_stmt(self,stmt: statements.Expression):
@@ -86,7 +91,20 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       value = self.evaluate(stmt.expression)
       print(self.stringify(value))
       return None
-   
+
+   def visit_var_stmt(self,stmt: statements.Var):
+      value : any = None
+      if stmt.initializer is not None:
+         print("Dentro valor")
+         value = self.evaluate(stmt.initializer)
+
+      self.ent.define(stmt.name.valor,value)
+      return None
+
+   def visit_assign_expr(self,expr:expressions.Assign):
+      value : any = self.evaluate(expr.value)
+      self.ent.assign(expr.name,value)
+      return value
 
    def visit_literal_expr(self,expr: expressions.Literal):
       return expr.value
@@ -108,6 +126,9 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
       ## Unreachable
       return None
+
+   def visit_variable_expr(self,expr:expressions.Variable):
+      return self.ent.get(expr.name)
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)
