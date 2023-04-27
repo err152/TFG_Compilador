@@ -107,8 +107,6 @@ Ahora definimos la función varDeclaration() que crea las variables de forma que
 
 Finalmente se añade el caso del indentificador al la función primary().
 
-
-
 #### 8.3. Entornos
 
 Las asignaciones que asocian las variables con sus valores deben estar almacenadas en algún sitio. Este sitio se llama entorno (Enviroment).
@@ -119,13 +117,9 @@ Se crea una nueva clase Entorno que tendrá como atributo un diccionario con las
 
 - get(name) para comprobar si ya existe una variable.
 
-
-
 Volviendo al Interprete, ahora se crea un entorno como atributo de manera que guarde los valores hasta que este termine de ejecutar. 
 
 Dado que se tienen dos nuevos arboles sintacticos se deberán crear dos nuevas funciones visit, una para cada una.
-
-
 
 #### 8.4. Asignación
 
@@ -137,6 +131,18 @@ Ahora se tiene un nuevo nodo en nuestro árbol semántico que se define en el in
 
 En Entorno se añade assign(name,value).
 
-
-
 #### 8.5. Scope
+
+Un scope define la region donde los nombre se mapea a una cierta entidad. Multiples scopes permiten al mismo nombre referirse a diferentes cosas en diferentes contextos.
+
+Lexical Scope es un tipo específico de scoping donde el texto de un programa se muestra donde empieza y termina un scope. Por otro lado tenemos Scope Dinámico en donde no se sabe a que se refiere un nombre hasta que se ejecuta el código. Lox no tiene variables scopeadas dinámicamente, pero si métodos y campos en objetos.
+
+Una primera aproximación a implementar el scoping podría funcionar así:
+
+1. Según se visita cada declaración dentro de un bloque, se realiza un seguimiento de cualquier variable declarada.
+
+2. Cuando la última declaración se ejecuta, se le pide al entorno que borre todas esas variables.
+
+Esto no funciona del todo bien. Cuando una variable local tiene el mismo nombre que una variable en dentro de un scope, esta hace sombra a la exterior de manera que ya no puede acceder a esta otra, pero sigue estando ahí y volverá una vez se ejecute el scope.
+
+Se añade a la clase Entorno un atributo de su mismo tipo y se crean constructores para inicializarlo. También se modifican los métodos get() y assign() de manera que busquen las variables en el entorno y si no las encuentran comprueben el entorno exterior de forma recursiva.

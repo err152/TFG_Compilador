@@ -2,8 +2,13 @@ from Token import Token
 from typing import Any
 from abc import ABC, abstractmethod
 from expressions import Expr
+from typing import List
 
 class StmtVisitor(ABC):
+   @abstractmethod
+   def visit_block_stmt(self, stmt: 'Stmt'):
+       pass
+
    @abstractmethod
    def visit_expression_stmt(self, stmt: 'Stmt'):
        pass
@@ -21,6 +26,13 @@ class Stmt(ABC):
    @abstractmethod
    def acepta(StmtVisitor):
        pass
+
+class Block(Stmt):
+   def __init__(self,statements:List[Stmt]):
+       self.statements = statements
+
+   def acepta(self, visitor: StmtVisitor):
+       return visitor.visit_block_stmt(self)
 
 class Expression(Stmt):
    def __init__(self,expression:Expr):

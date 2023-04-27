@@ -1,6 +1,6 @@
 ¿En el libro, cuando define el orden de precedencia, pone las sumas y restas por encima de las multiplicaciones y 
 divisiones? Ejecuta siempre primero las operaciones a la derecha, sin importar la precedencia.
-Quizás haya que meter lexemas a los tokens. Las sumas de strings toma las comillas.
+Por qué previous se actualiza ¿? en executeBlock()
 
 TODO:
 - test unitarios de parser e interprete a ficheros como en la asignatura .out .try (realcionar con DRY en 

@@ -3,6 +3,7 @@ from Entorno import Entorno
 from typing import List
 import expressions
 import statements
+import copy
 
 class LoxRuntimeError(RuntimeError):
    token = None
@@ -13,7 +14,8 @@ class LoxRuntimeError(RuntimeError):
 
 class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
-   ent = Entorno()
+   def __init__(self):
+      self.ent = Entorno()
    
    def stringify(self, obj:any) -> str:
       if obj == None:
@@ -39,11 +41,11 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    def interpret(self,statements:List[statements.Stmt]):
       try:
-         print("declaraciones :::",statements)
+         #print("declaraciones :::",statements)
          for statement in statements:
             self.execute(statement)
       except RuntimeError as error:
-         Lox.runtimeError(error)
+         raise RuntimeError(error)
    
 
    def check_number_operand(self, operator: Token, operand: any):
@@ -78,8 +80,26 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    # Modificacion post_Statements
    
    def execute(self,stmt: statements.Stmt):
-      print("declaracion ::: ",stmt)
+      #print("declaracion ::: ",stmt)
       stmt.acepta(self)
+
+   def executeBlock(self,state:List[statements.Stmt],ento:Entorno):
+    previous = tuple(self.ent.values.items()) #copy.deepcopy(self.ent) # Guardo el entorno anterior
+    #print("#######", previous)
+    try:
+        self.ent = ento 
+        #print("Before execution:")
+        for stat in state:
+            self.execute(stat)
+        #print("After execution:")
+    finally:
+      #print('#------#', previous)
+      self.ent.values = dict(previous)
+
+   def visit_block_stmt(self,stmt: statements.Block):
+      #print("Dentro visit_block_stmt")
+      self.executeBlock(stmt.statements, Entorno(self.ent))
+      return None
 
    def visit_expression_stmt(self,stmt: statements.Expression):
       #print("dentro visit_expression_stmt")
@@ -93,11 +113,12 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       return None
 
    def visit_var_stmt(self,stmt: statements.Var):
+      #print("Dentro visit_var_stmt")
       value : any = None
       if stmt.initializer is not None:
-         print("Dentro valor")
+         #print("Dentro valor")
          value = self.evaluate(stmt.initializer)
-
+         
       self.ent.define(stmt.name.valor,value)
       return None
 
@@ -160,7 +181,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
             if self.is_number(left) and self.is_number(right):
                return float(left) + float(right)
             elif isinstance(left,str) and isinstance(right,str):
-               return left + right
+               return left[0:-1] + right[1::]
             raise LoxRuntimeError(expr.operator,"Operands must be two numbers or two strings.")
          case TokenType.SLASH:
             self.check_number_operands(expr.operator,left,right)

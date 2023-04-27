@@ -1,3 +1,6 @@
+##### Para ejecutar por fichero copiar
+## 'C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\b4sur4\\lox_prueba.lox'
+
 from pathlib import Path
 from sys import argv
 
@@ -51,7 +54,10 @@ class Lox:
     
 
     def runFile(path:str):
-        data = path.read_text(encoding='utf-8',errors='strict')
+        with open(path,'r') as archivo:
+            data = archivo.read()
+            #print(data)
+        #data = path.read_text(encoding='utf-8',errors='strict')
         Lox.run(data)
 
         if Lox.hadError:
@@ -59,7 +65,7 @@ class Lox:
         if Lox.hadRuntimeError:
             exit(70)
 
-        Lox.hadError = false
+        Lox.hadError = False
 
     def runPrompt():
         while True:
@@ -74,6 +80,8 @@ class Lox:
 
 
 def main(args):
+    #Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\b4sur4\\lox_prueba.lox')
+    
     if len(args) > 1:
         print("Usage: jlox [script]")
         exit(65)

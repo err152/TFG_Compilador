@@ -14,6 +14,7 @@ def defineAst(self, outputDir:str, baseName:str, types:[]):
         f.write("from abc import ABC, abstractmethod" + "\n")
         if baseName == "Stmt":
             f.write("from expressions import Expr"+"\n")
+            f.write("from typing import List"+"\n")
         f.write("\n")
 
         defineVisitor(self,f,baseName,types)
@@ -78,7 +79,8 @@ class GenerateAst:
                                 "Unary : Token operator, Expr right",
                                 "Variable : Token name"])
 
-        defineAst(self,outputDir+'/statements.py',"Stmt",["Expression : Expr expression",
-                                         "Print : Expr expression",
-                                         "Var : Token name, Expr initializer"])
+        defineAst(self,outputDir+'/statements.py',"Stmt",["Block : List[Stmt] statements",
+                                "Expression : Expr expression",
+                                "Print : Expr expression",
+                                "Var : Token name, Expr initializer"])
     

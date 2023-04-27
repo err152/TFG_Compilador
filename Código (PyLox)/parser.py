@@ -46,7 +46,7 @@ class Parser:
         return self.tokens[self.current-1]
 
     def advance(self) -> Token:
-        print("----- ",self.tokens[self.current])
+        #print("----- ",self.tokens[self.current])
         if self.isAtEnd() == False:
             self.current += 1
         return self.previous()
@@ -105,10 +105,10 @@ class Parser:
         expr = func
 
         while self.match(tipos):
-            a = self.peek()
             operator = self.previous()
-            b = self.peek()
+            #print("---- operator : ",operator)
             right = self.expression()
+            #print("---- right : ",right)
             expr = expressions.Binary(expr,operator,right)
 
         return expr
@@ -149,33 +149,46 @@ class Parser:
         #print("selfffff - ",self)
         if self.match(TokenType.PRINT):
             return self.printStatement()
+        if self.match(TokenType.LEFT_BRACE):
+            #print("Abro scope")
+            return statements.Block(self.block())
         
         return self.expressionStatement()
 
     def printStatement(self) -> Stmt:
-        print("PRINT statement")
+        #print("PRINT statement")
         value = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Print(value)
 
     def varDeclaration(self) -> Stmt:
-        print(" VAR statement")
+        #print(" VAR statement")
         name : Token = self.consume(TokenType.IDENTIFIER,"Expect variable name.")
-        print("name = ",name)
+        #print("name = ",name)
         initializer : Expr = None
         if self.match(TokenType.EQUAL):
-            print("variable inicializada")
+            #print("variable inicializada")
             initializer = self.expression()
-        print("inicializacion a ",initializer)
-
+        #print("inicializacion a ",initializer)
         self.consume(TokenType.SEMICOLON,"Expect ';' after variable declaration.")
         return statements.Var(name,initializer)
 
     def expressionStatement(self) -> Stmt:
-        print("EXPR statement")
+        #print("EXPR statement")
         expr = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Expression(expr)
+
+    def block(self) -> List[Stmt]:
+        statements : List[Stmt] = []
+
+        while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
+            statements.append(self.declaration())
+
+        #print("Dentro block statements = ",statements)
+        #print("Cierro scope")
+        self.consume(TokenType.RIGHT_BRACE,"Expect '}' after block.")
+        return statements
 
     def assignment(self) -> Expr:
         expr : Expr = self.equality()
@@ -185,7 +198,8 @@ class Parser:
             value : Expr = self.assignment()
 
             if isinstance(expr,expressions.Variable):
-                name : Token = expressions.Variable(expr.name)
+                name : Token = expr.name
+                print("Dentro assignment ",name,value)
                 return expressions.Assign(name,value)
 
             self.error(equals,"Invalid assignment target.")
@@ -259,8 +273,8 @@ def pot(x):
 
 if __name__ == '__main__':
     #pars = Parser([Token(0,TokenType.STRING,"'Hola mundo'"),Token(0,TokenType.EOF,"")])
-    pars = Parser([Token(0,TokenType['STRING'],"'Hola mundo'"), Token(0,TokenType['SEMICOLON'],";"),Token(0,TokenType['EOF'],"")])
-    #pars = Parser([Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"2"), Token(0,TokenType.EOF,"")])
+    #pars = Parser([Token(0,TokenType['STRING'],"'Hola mundo'"), Token(0,TokenType['SEMICOLON'],";"),Token(0,TokenType['EOF'],"")])
+    pars = Parser([Token(0,TokenType['NUMBER'],"1"), Token(0,TokenType['STAR'],"*"), Token(0,TokenType['NUMBER'],"2"), Token(0,TokenType['PLUS'],"+"), Token(0,TokenType['NUMBER'],"3"), Token(0,TokenType['SEMICOLON'],";"), Token(0,TokenType.EOF,"")])
     #print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
     #print(f"-- tokens in parser : {pars.tokens}")
     expr = pars.parse()
