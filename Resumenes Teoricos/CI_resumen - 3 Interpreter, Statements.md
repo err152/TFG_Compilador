@@ -146,3 +146,63 @@ Una primera aproximación a implementar el scoping podría funcionar así:
 Esto no funciona del todo bien. Cuando una variable local tiene el mismo nombre que una variable en dentro de un scope, esta hace sombra a la exterior de manera que ya no puede acceder a esta otra, pero sigue estando ahí y volverá una vez se ejecute el scope.
 
 Se añade a la clase Entorno un atributo de su mismo tipo y se crean constructores para inicializarlo. También se modifican los métodos get() y assign() de manera que busquen las variables en el entorno y si no las encuentran comprueben el entorno exterior de forma recursiva.
+
+## 9. Control de Flujo
+
+"Logic, like whiskey, loses its beneficial effect when taken in too large quantities" - Edward John Moreton Drax Plunkett, Lord Dunsany
+
+El siguiente paso para nuestro intérprete será lograr que sea Turing-completo.
+
+#### 9.1. Máquinas de Turing
+
+Las máquinas de Turing son un pequeño sistema que con la mínima maquinaria es capaz de calcular cualquiera de una clase (muy) grande de funciones.
+
+Cualquier lenguaje de programación con un mínimo nivel de expresividad es suficientemente potente como para calcular cualquier función computable.
+
+Esto se puede probar escribiendo un simulador de maquinas de Turing en tu lenguaje. Ya que Turing lo demostró para su máquina, eso significaría que tu lenguaje tambíen. Solo hay que traducir la función en una máquina de Turing, y luego probarlo en tu simulador.
+
+Si tu lenguaje puede hacerlo, se le considera Turing-completo. Las máquinas de Turing son muy simples, solamente se necesita aritmética, un poco de control de flujo y la habilidad de asignar y utilizar cantidades arbitrarias de memoria. Se tiene lo primero, ahora iremos a por lo segundo.
+
+## 9.2. Ejecución Condicional
+
+Podemos dividir el control de flujo en dos tipos:
+
+- Condicional o control de flujo en ramas (**Branching**), es utilizado para no ejecutar ciertos trozos del código. Saltar por encima de partes del código.
+
+- Control de flujo en bucles (**Looping**), ejecuta cierta parte del código más de una vez. Salta hacia atrás para voler a hacer algo, y para no entrar en bucles infinitos se tiene alguna condición lógica para salir de este.
+
+El branching es más simple así que se empezará por ahí. Lox no tiene operadores condicionales, así que se implementará la declaración **if** lo primero de todo. Nuestra gramática de statements gana una nueva producción:
+
+statement      → exprStmt
+                   | ifStmt
+                   | printStmt
+                   | block ;
+
+ifStmt         → "if" "(" expression ")" statement
+                   ( "else" statement )? ;
+
+Un statement if tiene una expresion para la condición, y un statement que ejecutar si la condición es cierta. Opcionalmente, puede tener un else y otro statement que ejecutar si la condición es falsa. Agregamos If al árbol sintáctico.
+
+Se añade también que el parser reconozca estos statements cuando lee el Token IF y llame al método ifStatement que parsee el resto. Si encuentra un Token else crea el statement y si no lo deja a None.
+
+Este statement else genera un problema de ambigüedad. Considera:
+
+```
+if (first) if (second) whenTrue(); else whenFalse();
+```
+
+¿A qué if pertenece el else? Tenemos que solucionar esto. En nuestro caso el else pertenecerá al if más cercano a este mismo, ya que if busca un else antes de retornar. De momento esto nos sirve y podemos pasar al intérprete, donde se añade un método visit_if_stmt que procese los ifs.
+
+#### 9.3. Operadores Lógicos
+
+Ahora se implementarán los operadores lógicos **and** y **or**. Estos funcionan de distinta manera ya que dependen del resultado de uno de los dos lados de la operación para producir su resultado. Es por esto que van separados del resto de operadores binarios.
+
+expression     → assignment ;
+assignment     → IDENTIFIER "=" assignment
+                       | logic_or ;
+logic_or       → logic_and ( "or" logic_and )* ;
+logic_and      → equality ( "and" equality )* ;
+
+
+
+Se añade al generador y en el parser ahora assignment() en vez de llamar a equality() llamará a orr(). Se definen los métodos orr() y andd(). Y en el intérprete se añade el método visit_logical_expr() después de visit_literal_expr().

@@ -147,6 +147,8 @@ class Parser:
     
     def statement(self) -> Stmt:
         #print("selfffff - ",self)
+        if self.match(TokenType.IF):
+            return self.ifStatement()
         if self.match(TokenType.PRINT):
             return self.printStatement()
         if self.match(TokenType.LEFT_BRACE):
@@ -154,6 +156,18 @@ class Parser:
             return statements.Block(self.block())
         
         return self.expressionStatement()
+
+    def ifStatement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'if'.")
+        condition : Expr = self.expression()
+        self.consume(TokenType.RIGHT_PA, "Expect ')' after if condition.")
+
+        thenBranch : Stmt = self.statement()
+        elseBranch : Stmt = None
+        if self.match(TokenType.ELSE):
+            elseBranch = self.statement()
+
+        return statements.If(condition,thenBranch,elseBranch)
 
     def printStatement(self) -> Stmt:
         #print("PRINT statement")
@@ -191,7 +205,7 @@ class Parser:
         return statements
 
     def assignment(self) -> Expr:
-        expr : Expr = self.equality()
+        expr : Expr = self.orr()
 
         if self.match(TokenType.EQUAL):
             equals : Token = self.previous()
@@ -199,10 +213,30 @@ class Parser:
 
             if isinstance(expr,expressions.Variable):
                 name : Token = expr.name
-                print("Dentro assignment ",name,value)
+                #print("Dentro assignment ",name,value)
                 return expressions.Assign(name,value)
 
             self.error(equals,"Invalid assignment target.")
+
+        return expr
+
+    def orr(self) -> Expr:
+        expr : Expr = self.andd()
+
+        while self.match(TokenType.OR):
+            operator : Token = self.previous()
+            right : Expr = self.andd()
+            expr = expressions.Logical(expr,operator,right)
+        
+        return expr
+
+    def andd(self) -> Expr:
+        expr : Expr = self.equality()
+
+        while self.match(TokenType.AND):
+            operator : Token = self.previous()
+            right : Expr = self.equality()
+            expr = expressions.Logical(expr, operator, right)
 
         return expr
     

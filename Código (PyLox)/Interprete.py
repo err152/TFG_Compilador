@@ -72,6 +72,8 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       #return isinstance(obj,(int,float))
 
    def is_truthy(self, obj: any) -> bool:
+      if obj == "0":
+         return False
       return bool(obj)
 
    def evaluate(self,expr: expressions.Expr):
@@ -106,6 +108,13 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       value = self.evaluate(stmt.expression)
       return None
 
+   def visit_if_stmt(self, stmt: statements.If):
+      if self.is_truthy(self.evaluate(stmt.condition)):
+         self.execute(stmt.thenBranch)
+      elif stmt.elseBranch is not None:
+         self.execute(stmt.elseBranch)
+      return None
+
    def visit_print_stmt(self,stmt: statements.Print):
       #print("Dentro visit_print_stmt")
       value = self.evaluate(stmt.expression)
@@ -129,6 +138,24 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def visit_literal_expr(self,expr: expressions.Literal):
       return expr.value
+
+   def visit_logical_expr(self,expr: expressions.Logical):
+      #print("Dentro logical expr")
+      left = self.evaluate(expr.left)
+      #print("-- left : ",left," bool() = ",self.is_truthy(left))
+      if expr.operator.tipo == TokenType.OR:
+         if self.is_truthy(left):
+            return left
+      elif not self.is_truthy(left):
+         return False # left
+      
+      x = self.evaluate(expr.right)
+      #print("-- right : ",x," bool() = ",self.is_truthy(x))
+      if x == None or x == "0":
+         return False
+      else:
+         return x
+      #return self.is_truthy(self.evaluate(expr.right))
 
    def visit_grouping_expr(self,expr: expressions.Grouping):
       return self.evaluate(expr.expression)  

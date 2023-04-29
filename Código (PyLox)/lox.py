@@ -81,7 +81,6 @@ class Lox:
 
 def main(args):
     #Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\b4sur4\\lox_prueba.lox')
-    
     if len(args) > 1:
         print("Usage: jlox [script]")
         exit(65)

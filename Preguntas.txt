@@ -1,6 +1,7 @@
 ¿En el libro, cuando define el orden de precedencia, pone las sumas y restas por encima de las multiplicaciones y 
 divisiones? Ejecuta siempre primero las operaciones a la derecha, sin importar la precedencia.
 Por qué previous se actualiza ¿? en executeBlock()
+Cambiar token nil a None para que sea más claro. true a True tambien?
 
 TODO:
 - test unitarios de parser e interprete a ficheros como en la asignatura .out .try (realcionar con DRY en 
