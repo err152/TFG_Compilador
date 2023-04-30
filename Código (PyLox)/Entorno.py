@@ -14,9 +14,9 @@ class Entorno:
       if name.valor in self.values:
          return self.values.get(name.valor)
 
-      print("fuera get")
+      #print("fuera get")
       if self.enclose is not None:
-         print("Dentro get enclose = ",self.enclose)
+         #print("Dentro get enclose = ",self.enclose)
          return self.enclose.get(name)
 
       raise RuntimeError(name,"Undefined variable '"+name.valor+"'.")
@@ -26,9 +26,9 @@ class Entorno:
          self.values[name] = value #no estoy seguro de esto : values.put(name.lexeme, value);
          return
 
-      print("fuera assign")
+      #print("fuera assign")
       if self.enclose is not None:
-         print("Dentro assign enclose = ",self.enclose)
+         #print("Dentro assign enclose = ",self.enclose)
          self.enclose.assign(name,value)
          return
 

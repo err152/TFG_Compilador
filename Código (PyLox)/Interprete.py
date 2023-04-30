@@ -131,6 +131,13 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       self.ent.define(stmt.name.valor,value)
       return None
 
+   def visit_while_stmt(self,stmt: statements.While):
+      while self.is_truthy(self.evaluate(stmt.condition)):
+         print("Condicion : ",stmt.condition,stmt.condition.left.name.valor, stmt.condition.operator, stmt.condition.right.value)
+         self.execute(stmt.body)
+
+      return None
+
    def visit_assign_expr(self,expr:expressions.Assign):
       value : any = self.evaluate(expr.value)
       self.ent.assign(expr.name,value)

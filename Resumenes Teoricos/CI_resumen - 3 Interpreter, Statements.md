@@ -206,3 +206,19 @@ logic_and      → equality ( "and" equality )* ;
 
 
 Se añade al generador y en el parser ahora assignment() en vez de llamar a equality() llamará a orr(). Se definen los métodos orr() y andd(). Y en el intérprete se añade el método visit_logical_expr() después de visit_literal_expr().
+
+
+
+#### 9.4. Bucles While
+
+Lox cuenta con dos tipos de control de flujo por bucles, **while** y **for**. Se empieza por el bucle while al ser este más sencillo.
+
+statement      → exprStmt
+                       | ifStmt
+                       | printStmt
+                       | whileStmt
+                       | block ;
+
+whileStmt      → "while" "(" expression ")" statement ;
+
+Se añade While al generador,al parser con su método whileStatement(), y al intérprete con el método visit_while_stmt().

@@ -151,6 +151,9 @@ class Parser:
             return self.ifStatement()
         if self.match(TokenType.PRINT):
             return self.printStatement()
+        if self.match(TokenType.WHILE):
+            print("Dentro statement WHILE -/")
+            return self.whileStatement()
         if self.match(TokenType.LEFT_BRACE):
             #print("Abro scope")
             return statements.Block(self.block())
@@ -160,7 +163,7 @@ class Parser:
     def ifStatement(self) -> Stmt:
         self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'if'.")
         condition : Expr = self.expression()
-        self.consume(TokenType.RIGHT_PA, "Expect ')' after if condition.")
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
 
         thenBranch : Stmt = self.statement()
         elseBranch : Stmt = None
@@ -186,6 +189,17 @@ class Parser:
         #print("inicializacion a ",initializer)
         self.consume(TokenType.SEMICOLON,"Expect ';' after variable declaration.")
         return statements.Var(name,initializer)
+
+    def whileStatement(self) -> Stmt : 
+        print("Dentro whileStatement :")
+        self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'while'.")
+        condition : Expr = self.expression()
+        print("----- condition = ",condition)
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+        body : Stmt = self.statement()
+        print("----- body = ",body)
+
+        return statements.While(condition, body)
 
     def expressionStatement(self) -> Stmt:
         #print("EXPR statement")
