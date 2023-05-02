@@ -46,7 +46,7 @@ class Lox:
         stmts = pars.parse()
 
         #print(AstPrinter.AstPrinter().print(stmts))
-        print("statements :: ",stmts[0].expression.left.value,stmts[0].expression.right)
+        #print("statements :: ",stmts[0].expression.left.value,stmts[0].expression.right)
         
         inter = Interprete()
         inter.interpret(stmts)
@@ -93,5 +93,5 @@ def main(args):
     else:
         Lox.runPrompt()
     
-
+    
 main(argv[1:])

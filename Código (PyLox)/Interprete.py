@@ -96,7 +96,14 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
         #print("After execution:")
     finally:
       #print('#------#', previous)
-      self.ent.values = dict(previous)
+      temp = dict()
+      for key,value in dict(previous).items():
+         if key in self.ent.values:
+            temp[key] = self.ent.values[key]
+         else:
+            temp[key] = value
+         
+      self.ent.values = temp
 
    def visit_block_stmt(self,stmt: statements.Block):
       #print("Dentro visit_block_stmt")
@@ -187,9 +194,9 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)
-      #print("::: left = ",left)
+      print("::: left = ",left)
       right = self.evaluate(expr.right)
-      #print("::: right = ",right)
+      print("::: right = ",right)
 
       match expr.operator.tipo:
          case TokenType.BANG_EQUAL:

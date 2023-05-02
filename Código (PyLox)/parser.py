@@ -107,13 +107,15 @@ class Parser:
         while self.match(tipos):
             operator = self.previous()
             #print("---- operator : ",operator)
-            right = self.expression()
+            
+            right = func
             #print("---- right : ",right)
             expr = expressions.Binary(expr,operator,right)
 
         return expr
 
     def factor(self) -> Expr:
+        print("")
         tipos = [TokenType.SLASH,TokenType.STAR]
         return self.binary_op(self.unary(),tipos)
 
