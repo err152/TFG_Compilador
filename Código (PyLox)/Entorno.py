@@ -23,7 +23,7 @@ class Entorno:
 
    def assign(self, name:Token,value:any):
       if name.valor in self.values:
-         self.values[name] = value #no estoy seguro de esto : values.put(name.lexeme, value);
+         self.values[name.valor] = value #no estoy seguro de esto : values.put(name.lexeme, value);
          return
 
       #print("fuera assign")

@@ -227,7 +227,7 @@ class Parser:
 
             if isinstance(expr,expressions.Variable):
                 name : Token = expr.name
-                #print("Dentro assignment ",name,value)
+                print("Dentro assignment ",name,value)
                 return expressions.Assign(name,value)
 
             self.error(equals,"Invalid assignment target.")

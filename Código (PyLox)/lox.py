@@ -45,8 +45,8 @@ class Lox:
         #expr = pars.parse()
         stmts = pars.parse()
 
-        #print(AstPrinter.AstPrinter().print(expr))
-        #print("statements :: ",stmts)
+        #print(AstPrinter.AstPrinter().print(stmts))
+        print("statements :: ",stmts[0].expression.left.value,stmts[0].expression.right)
         
         inter = Interprete()
         inter.interpret(stmts)
@@ -80,7 +80,7 @@ class Lox:
 
 
 def main(args):
-    
+    '''
     Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\b4sur4\\lox_prueba.lox')
     '''
     if len(args) > 1:
@@ -92,6 +92,6 @@ def main(args):
 
     else:
         Lox.runPrompt()
-    '''
+    
 
 main(argv[1:])

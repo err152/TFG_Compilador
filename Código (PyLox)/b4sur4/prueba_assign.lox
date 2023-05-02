@@ -1,0 +1,15 @@
+var a = 1;
+var b = a +1;
+var c = "hola";
+
+print a;
+print b;
+print c;
+
+a = 2;
+b = b + a;
+c = c + "no";
+
+print a;
+print b;
+print c;

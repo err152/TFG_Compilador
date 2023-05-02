@@ -1,7 +1,8 @@
 ¿En el libro, cuando define el orden de precedencia, pone las sumas y restas por encima de las multiplicaciones y 
 divisiones? Ejecuta siempre primero las operaciones a la derecha, sin importar la precedencia.
-Por qué previous se actualiza ¿? en executeBlock()
 Cambiar token nil a None para que sea más claro. true a True tambien?
+Los ifs y whiles al tener su cuerpo definido entre {} es interpretado como bloque(scope), por lo que al salir de él
+se restaura el contexto anulando cualquier modificación sobre variables.
 
 TODO:
 - test unitarios de parser e interprete a ficheros como en la asignatura .out .try (realcionar con DRY en 
