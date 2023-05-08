@@ -26,30 +26,15 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
             text = text[0:len(text)-2]
          return text
       return str(obj)
-
-   '''
-   def interpret(self,expression:expressions.Expr):
-      try:
-         value = self.evaluate(expression)
-         print(self.stringify(value))
-      except LoxRuntimeError as error:
-         print(error)
-      #except error:
-         #print("Lox.runtimeError") # Provisional
-   ''' 
-   # Modificación post-Statements
    
    def interpret(self,statements:List[statements.Stmt]):
       try:
-         #print("declaraciones :::",statements)
          for statement in statements:
             self.execute(statement)
       except RuntimeError as error:
          raise RuntimeError(error)
-   
 
    def check_number_operand(self, operator: Token, operand: any):
-      #print("operator : ",operator," operand : ",operand)
       if self.is_number(operand):
          return
       raise LoxRuntimeError(operator,"Operand must be a number.")
@@ -63,13 +48,11 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       return a == b
 
    def is_number(self, obj: any) -> bool:
-      #print("::::::: obj = ",obj," de tipo ",type(obj))
       try:
          float(obj)
          return True
       except ValueError:
          return False
-      #return isinstance(obj,(int,float))
 
    def is_truthy(self, obj: any) -> bool:
       if obj == "0":
@@ -78,39 +61,24 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def evaluate(self,expr: expressions.Expr):
       return expr.acepta(self)
-
-   # Modificacion post_Statements
    
    def execute(self,stmt: statements.Stmt):
-      #print("declaracion ::: ",stmt)
       stmt.acepta(self)
 
    def executeBlock(self,state:List[statements.Stmt]):
       self.ent.enter_scope()
-      
-      #previous = tuple(self.ent.values.items()) #copy.deepcopy(self.ent) # Guardo el entorno anterior
-      #previous_dec = tuple(self.ent.declared)
-      #print("#######", previous)
       try:
-        #self.ent = ento 
-        #print("Before execution:")
         for stat in state:
             self.execute(stat)
-        #print("After execution:")
       finally:
-      #print('#------#', previous)
          
          self.ent.exit_scope()
-      #self.ent.declared = dict(previous_dec)
-      #self.ent.values = dict(previous)
 
    def visit_block_stmt(self,stmt: statements.Block):
-      #print("Dentro visit_block_stmt")
       self.executeBlock(stmt.statements)
       return None
 
    def visit_expression_stmt(self,stmt: statements.Expression):
-      #print("dentro visit_expression_stmt")
       value = self.evaluate(stmt.expression)
       return None
 
@@ -122,16 +90,13 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       return None
 
    def visit_print_stmt(self,stmt: statements.Print):
-      #print("Dentro visit_print_stmt")
       value = self.evaluate(stmt.expression)
       print(self.stringify(value))
       return None
 
    def visit_var_stmt(self,stmt: statements.Var):
-      #print("Dentro visit_var_stmt")
       value : any = None
       if stmt.initializer is not None:
-         #print("Dentro valor")
          value = self.evaluate(stmt.initializer)
          
       self.ent.define(stmt.name.valor,value)
@@ -139,7 +104,6 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def visit_while_stmt(self,stmt: statements.While):
       while self.is_truthy(self.evaluate(stmt.condition)):
-         #print("Condicion : ",stmt.condition,stmt.condition.left.name.valor, stmt.condition.operator, stmt.condition.right.value)
          self.execute(stmt.body)
 
       return None
@@ -153,9 +117,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       return expr.value
 
    def visit_logical_expr(self,expr: expressions.Logical):
-      #print("Dentro logical expr")
       left = self.evaluate(expr.left)
-      #print("-- left : ",left," bool() = ",self.is_truthy(left))
       if expr.operator.tipo == TokenType.OR:
          if self.is_truthy(left):
             return left
@@ -163,23 +125,19 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          return False # left
       
       x = self.evaluate(expr.right)
-      #print("-- right : ",x," bool() = ",self.is_truthy(x))
       if x == None or x == "0":
          return False
       else:
          return x
-      #return self.is_truthy(self.evaluate(expr.right))
 
    def visit_grouping_expr(self,expr: expressions.Grouping):
       return self.evaluate(expr.expression)  
 
    def visit_unary_expr(self, expr: expressions.Unary):
       right = self.evaluate(expr.right)
-      #print("::: right = ",right,type(right))
 
       match expr.operator.tipo:
          case TokenType.MINUS:
-            #print("operator : ",expr.operator)
             self.check_number_operand(expr.operator,right)
             return -float(right)
          case TokenType.BANG:
@@ -193,9 +151,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)
-      #print("::: left = ",left)
       right = self.evaluate(expr.right)
-      #print("::: right = ",right)
 
       match expr.operator.tipo:
          case TokenType.BANG_EQUAL:

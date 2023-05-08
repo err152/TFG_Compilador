@@ -20,7 +20,6 @@ class Lexer:
         while self.pos < len(self.entrada):
             caracter = self.entrada[self.pos]
             mid = self.token_actual()
-            #print("----- ",self.inicio," : ",estado," : ",caracter," : ",mid," : ",self.pos)
             nuevo_estado = self.transicion(estado,caracter,mid)
             if nuevo_estado == 'ERROR':
                 if estado not in ('ESPACIO','NUMBER_','COMMENT_'):
@@ -30,7 +29,6 @@ class Lexer:
                 
             elif nuevo_estado == 'ESPACIO':
                 if estado not in ('inicial','ERROR','ESPACIO'):
-                    #print(":::::: caracter = ",caracter," estado = ",estado)
                     yield Token(self.linea,TokenType[estado],self.token_actual())
                 self.inicio = self.pos
                 self.pos += 1
@@ -45,10 +43,7 @@ class Lexer:
 
     
     def transicion(self,estado,caracter,mid):
-        #print(" :: transicion :: estado ",estado," caracter ",caracter," mid ",mid)
-        #print(" :://:://:: ",TokenType(caracter).name)
         if estado == 'inicial' and caracter in SINGLE_CHARS:
-            #print(":::::: single char : ",caracter," es tokenType : ",TokenType(caracter).name)
             return TokenType(caracter).name
 
         elif estado == 'inicial' and caracter in MULTI_CHARS: 
@@ -132,26 +127,4 @@ if __name__ == '__main__':
     a = Lexer('''true''')
     b = str(a.extrae_tokens())
     print(b)
-    #a = Lexer('"espacio " 32 \ne2p4c10 ')
-    #l = []
-    #for i in a.devolver_tokens():
-    #    l.append(i)
-    #print(l)
-    #analizador = Lexer("AAAAAA  A")
-    #analizador = Lexer("> == *- 34")
-    #analizador = Lexer("string 'Hola mundo' Sinbad el 'marino' soy")
-    #analizador = Lexer(" '' ' ' ")
-    #analizador = Lexer(" 2 2345 2.356 2. ")
-    #analizador = Lexer('''class Brunch < Breakfast {
-    #   init(meat, bread, drink) {
-    #       super.init(meat, bread);
-    #       this.drink = drink;
-    #       }
-    #   }''')
-    #analizador = Lexer(" true false and adn burrito")
-    #analizador = Lexer(" a si //Esto es un comentario \n Holaa")
-    #analizador = Lexer('"string _ 34 */' ' " check')
-    
-    #for i in analizador.devolver_tokens():
-    #    print(i)
         

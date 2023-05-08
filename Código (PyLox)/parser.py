@@ -46,7 +46,6 @@ class Parser:
         return self.tokens[self.current-1]
 
     def advance(self) -> Token:
-        #print("----- ",self.tokens[self.current])
         if self.isAtEnd() == False:
             self.current += 1
         return self.previous()
@@ -85,7 +84,7 @@ class Parser:
         if self.match(TokenType.NUMBER,TokenType.STRING):
             return expressions.Literal(self.previous().valor)
         if self.match(TokenType.IDENTIFIER):
-            return expressions.Variable(self.previous()) # quizás hace falta .valor ¿?
+            return expressions.Variable(self.previous())
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN,"Expect ')' after expression.")
@@ -129,16 +128,12 @@ class Parser:
 
         while self.match(tipos):
             operator = self.previous()
-            #print("---- operator : ",operator)
-            
             right = func() #self.expression()
-            #print("---- right : ",right)
             expr = expressions.Binary(expr,operator,right)
 
         return expr
 
     def factor(self) -> Expr:
-        #print("")
         tipos = [TokenType.SLASH,TokenType.STAR]
         return self.binary_op(self.unary,tipos)
 
@@ -167,11 +162,8 @@ class Parser:
         except self.ParseError as e:
             self.synchronize()
             return None
-    
-    # Modificación post-Statements
-    
+        
     def statement(self) -> Stmt:
-        #print("selfffff - ",self)
         if self.match(TokenType.FOR):
             return self.forStatement()
         if self.match(TokenType.IF):
@@ -179,10 +171,8 @@ class Parser:
         if self.match(TokenType.PRINT):
             return self.printStatement()
         if self.match(TokenType.WHILE):
-            #print("Dentro statement WHILE -/")
             return self.whileStatement()
         if self.match(TokenType.LEFT_BRACE):
-            #print("Abro scope")
             return statements.Block(self.block())
         
         return self.expressionStatement()
@@ -234,36 +224,27 @@ class Parser:
         return statements.If(condition,thenBranch,elseBranch)
 
     def printStatement(self) -> Stmt:
-        #print("PRINT statement")
         value = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Print(value)
 
     def varDeclaration(self) -> Stmt:
-        #print(" VAR statement")
         name : Token = self.consume(TokenType.IDENTIFIER,"Expect variable name.")
-        #print("name = ",name)
         initializer : Expr = None
         if self.match(TokenType.EQUAL):
-            #print("variable inicializada")
             initializer = self.expression()
-        #print("inicializacion a ",initializer)
         self.consume(TokenType.SEMICOLON,"Expect ';' after variable declaration.")
         return statements.Var(name,initializer)
 
     def whileStatement(self) -> Stmt : 
-        #print("Dentro whileStatement :")
         self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'while'.")
         condition : Expr = self.expression()
-        #print("----- condition = ",condition)
         self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
         body : Stmt = self.statement()
-        #print("----- body = ",body)
 
         return statements.While(condition, body)
 
     def expressionStatement(self) -> Stmt:
-        #print("EXPR statement")
         expr = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Expression(expr)
@@ -274,8 +255,6 @@ class Parser:
         while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
             statements.append(self.declaration())
 
-        #print("Dentro block statements = ",statements)
-        #print("Cierro scope")
         self.consume(TokenType.RIGHT_BRACE,"Expect '}' after block.")
         return statements
     
@@ -285,8 +264,6 @@ class Parser:
         while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
             statements.append(self.declaration())
 
-        #print("Dentro block statements = ",statements)
-        #print("Cierro scope")
         self.consume(TokenType.RIGHT_BRACE,"Expect '}' after block.")
         return statements
 
@@ -299,7 +276,6 @@ class Parser:
 
             if isinstance(expr,expressions.Variable):
                 name : Token = expr.name
-                #print("Dentro assignment ",name,value)
                 return expressions.Assign(name,value)
 
             self.error(equals,"Invalid assignment target.")
@@ -326,17 +302,6 @@ class Parser:
 
         return expr
     
-    '''
-    def parse(self) -> expressions.Expr:
-        #print(self.tokens)
-        try:
-            return self.expression()
-        except self.ParseError:
-            return None
-   
-    # Parser post-Statements
-    '''
-    
     def parse(self) -> List[Stmt]:
         stmts : List[statements.Stmt] = []
         while not self.isAtEnd():
@@ -344,30 +309,6 @@ class Parser:
             stmts.append(self.declaration())
 
         return stmts
-    
-
-'''
-def comparison(self) -> expressions.Expr:
-    expr = self.term()
-
-    while self.match(TokenType.GREATER,GREATER_EQUAL,LESS,LESS_EQUAL):
-        operator = self.previous()
-        right = self.term()
-        expr = expressions.Binary(expr,operator,right)
-
-    return expr
-
-def equality(self) -> expressions.Expr:
-    expr = self.comparison()
-
-    while self.match(TokenType.BANG_EQUAL,TokenType.EQUAL_EQUAL):
-        operator = self.previous()
-        right = self.comparison()
-        expr = expressions.Binary(expr,operator,right)
-
-    return expr
-'''
-
     
 ## Implementación Domingo
 
