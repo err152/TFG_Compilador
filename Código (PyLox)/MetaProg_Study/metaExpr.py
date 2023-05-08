@@ -12,9 +12,9 @@ def defineAst(self, outputDir:str, baseName:str, types:[]):
         f.write("from Token import Token" + "\n")
         f.write("from typing import Any" + "\n")
         f.write("from abc import ABC, abstractmethod" + "\n")
+        f.write("from typing import List"+"\n")
         if baseName == "Stmt":
             f.write("from expressions import Expr"+"\n")
-            f.write("from typing import List"+"\n")
         f.write("\n")
 
         defineVisitor(self,f,baseName,types)
@@ -74,6 +74,7 @@ class GenerateAst:
         
         defineAst(self,outputDir+'/expressions.py',"Expr",["Binary : Expr left, Token operator, Expr right",
                                 "Assign : Token name, Expr value",
+                                "Call : Expr callee, Token paren, List[Expr] arguments",
                                 "Grouping : Expr expression",
                                 "Literal : Any value",
                                 "Logical : Expr left, Token operator, Expr right",

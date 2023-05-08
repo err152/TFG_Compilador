@@ -1,8 +1,8 @@
 from Token import Token
 from typing import Any
 from abc import ABC, abstractmethod
-from expressions import Expr
 from typing import List
+from expressions import Expr
 
 class StmtVisitor(ABC):
    @abstractmethod

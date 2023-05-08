@@ -99,37 +99,60 @@ class Parser:
             right = self.unary()
             return expressions.Unary(operator,right)
     
-        return self.primary()
+        return self.call()
+
+    def finishCall(self,callee: Expr) -> Expr:
+        arguments : List[Expr] = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                arguments.append(self.expression())
+                if self.match(TokenType.COMMA):
+                    break
+
+        paren : Token = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+        return expressions.Call(callee,paren,arguments)
+         
+
+    def call(self) -> Expr:
+        expr : Expr = self.primary()
+
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expr = self.finishCall(expr)
+            else:
+                break
+        
+        return expr
 
     def binary_op(self,func,tipos) -> Expr:
-        expr = func
+        expr = func()
 
         while self.match(tipos):
             operator = self.previous()
             #print("---- operator : ",operator)
             
-            right = func
+            right = func() #self.expression()
             #print("---- right : ",right)
             expr = expressions.Binary(expr,operator,right)
 
         return expr
 
     def factor(self) -> Expr:
-        print("")
+        #print("")
         tipos = [TokenType.SLASH,TokenType.STAR]
-        return self.binary_op(self.unary(),tipos)
+        return self.binary_op(self.unary,tipos)
 
     def term(self) -> Expr:
         tipos = [TokenType.MINUS,TokenType.PLUS]
-        return self.binary_op(self.factor(),tipos)
+        return self.binary_op(self.factor,tipos)
 
     def comparison(self) -> Expr:
         tipos = [TokenType.GREATER,TokenType.GREATER_EQUAL,TokenType.LESS,TokenType.LESS_EQUAL]
-        return self.binary_op(self.term(),tipos)
+        return self.binary_op(self.term,tipos)
 
     def equality(self) -> Expr:
         tipos = [TokenType.BANG_EQUAL,TokenType.EQUAL_EQUAL]
-        return self.binary_op(self.comparison(),tipos)
+        return self.binary_op(self.comparison,tipos)
 
     def expression(self) -> Expr:
         return self.assignment()
@@ -149,18 +172,54 @@ class Parser:
     
     def statement(self) -> Stmt:
         #print("selfffff - ",self)
+        if self.match(TokenType.FOR):
+            return self.forStatement()
         if self.match(TokenType.IF):
             return self.ifStatement()
         if self.match(TokenType.PRINT):
             return self.printStatement()
         if self.match(TokenType.WHILE):
-            print("Dentro statement WHILE -/")
+            #print("Dentro statement WHILE -/")
             return self.whileStatement()
         if self.match(TokenType.LEFT_BRACE):
             #print("Abro scope")
             return statements.Block(self.block())
         
         return self.expressionStatement()
+
+    def forStatement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'for'.")
+
+        initializer : Stmt = None  # initializer
+        if self.match(TokenType.SEMICOLON):
+            initializer = None
+        elif self.match(TokenType.VAR):
+            initializer = self.varDeclaration()
+        else:
+            initializer = self.expressionStatement()
+        
+        condition : Expr = None # condition
+        if not self.check(TokenType.SEMICOLON):
+            condition = self.expression() 
+            self.consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
+
+        increment : Expr = None # incremento
+        if not self.check(TokenType.RIGHT_PAREN):
+            increment = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
+
+        body : Stmt = self.statement()
+        if increment is not None:
+            body = statements.Block([body,statements.Expression(increment)])
+
+        if condition is None:
+            condition = expressions.Literal(True)
+        body = statements.While(condition,body)
+
+        if initializer is not None:
+            body = statements.Block([initializer,body])
+
+        return body
 
     def ifStatement(self) -> Stmt:
         self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'if'.")
@@ -193,13 +252,13 @@ class Parser:
         return statements.Var(name,initializer)
 
     def whileStatement(self) -> Stmt : 
-        print("Dentro whileStatement :")
+        #print("Dentro whileStatement :")
         self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'while'.")
         condition : Expr = self.expression()
-        print("----- condition = ",condition)
+        #print("----- condition = ",condition)
         self.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
         body : Stmt = self.statement()
-        print("----- body = ",body)
+        #print("----- body = ",body)
 
         return statements.While(condition, body)
 
@@ -219,6 +278,17 @@ class Parser:
         #print("Cierro scope")
         self.consume(TokenType.RIGHT_BRACE,"Expect '}' after block.")
         return statements
+    
+    def block_bucle(self) -> List[Stmt]:
+        statements : List[Stmt] = []
+
+        while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
+            statements.append(self.declaration())
+
+        #print("Dentro block statements = ",statements)
+        #print("Cierro scope")
+        self.consume(TokenType.RIGHT_BRACE,"Expect '}' after block.")
+        return statements
 
     def assignment(self) -> Expr:
         expr : Expr = self.orr()
@@ -229,7 +299,7 @@ class Parser:
 
             if isinstance(expr,expressions.Variable):
                 name : Token = expr.name
-                print("Dentro assignment ",name,value)
+                #print("Dentro assignment ",name,value)
                 return expressions.Assign(name,value)
 
             self.error(equals,"Invalid assignment target.")

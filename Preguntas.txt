@@ -1,13 +1,11 @@
-¿En el libro, cuando define el orden de precedencia, pone las sumas y restas por encima de las multiplicaciones y 
-divisiones? Ejecuta siempre primero las operaciones a la derecha, sin importar la precedencia.
 Cambiar token nil a None para que sea más claro. true a True tambien?
-Los ifs y whiles al tener su cuerpo definido entre {} es interpretado como bloque(scope), por lo que al salir de él
-se restaura el contexto anulando cualquier modificación sobre variables.
 
 TODO:
 - test unitarios de parser e interprete a ficheros como en la asignatura .out .try (realcionar con DRY en 
 memoria)
 - apuntar por que hemos utilizado esta metodologia (cascada¿?) y no otra
 - vanilla programming
+- Explicar mensajes de Git commit
+- Comentar cambios frente al libro sobre el executeBlock y el Entorno
 
  

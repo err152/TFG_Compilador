@@ -1,6 +1,7 @@
 from Token import Token
 from typing import Any
 from abc import ABC, abstractmethod
+from typing import List
 
 class ExprVisitor(ABC):
    @abstractmethod
@@ -9,6 +10,10 @@ class ExprVisitor(ABC):
 
    @abstractmethod
    def visit_assign_expr(self, expr: 'Expr'):
+       pass
+
+   @abstractmethod
+   def visit_call_expr(self, expr: 'Expr'):
        pass
 
    @abstractmethod
@@ -53,6 +58,15 @@ class Assign(Expr):
 
    def acepta(self, visitor: ExprVisitor):
        return visitor.visit_assign_expr(self)
+
+class Call(Expr):
+   def __init__(self,callee:Expr,paren:Token,arguments:List[Expr]):
+       self.callee = callee
+       self.paren = paren
+       self.arguments = arguments
+
+   def acepta(self, visitor: ExprVisitor):
+       return visitor.visit_call_expr(self)
 
 class Grouping(Expr):
    def __init__(self,expression:Expr):

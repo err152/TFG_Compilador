@@ -1,9 +1,9 @@
 from Token import Token,TokenType
 from Entorno import Entorno
 from typing import List
+#import LoxCallable
 import expressions
 import statements
-import copy
 
 class LoxRuntimeError(RuntimeError):
    token = None
@@ -85,29 +85,28 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       #print("declaracion ::: ",stmt)
       stmt.acepta(self)
 
-   def executeBlock(self,state:List[statements.Stmt],ento:Entorno):
-    previous = tuple(self.ent.values.items()) #copy.deepcopy(self.ent) # Guardo el entorno anterior
-    #print("#######", previous)
-    try:
-        self.ent = ento 
+   def executeBlock(self,state:List[statements.Stmt]):
+      self.ent.enter_scope()
+      
+      #previous = tuple(self.ent.values.items()) #copy.deepcopy(self.ent) # Guardo el entorno anterior
+      #previous_dec = tuple(self.ent.declared)
+      #print("#######", previous)
+      try:
+        #self.ent = ento 
         #print("Before execution:")
         for stat in state:
             self.execute(stat)
         #print("After execution:")
-    finally:
+      finally:
       #print('#------#', previous)
-      temp = dict()
-      for key,value in dict(previous).items():
-         if key in self.ent.values:
-            temp[key] = self.ent.values[key]
-         else:
-            temp[key] = value
          
-      self.ent.values = temp
+         self.ent.exit_scope()
+      #self.ent.declared = dict(previous_dec)
+      #self.ent.values = dict(previous)
 
    def visit_block_stmt(self,stmt: statements.Block):
       #print("Dentro visit_block_stmt")
-      self.executeBlock(stmt.statements, Entorno(self.ent))
+      self.executeBlock(stmt.statements)
       return None
 
    def visit_expression_stmt(self,stmt: statements.Expression):
@@ -140,7 +139,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def visit_while_stmt(self,stmt: statements.While):
       while self.is_truthy(self.evaluate(stmt.condition)):
-         print("Condicion : ",stmt.condition,stmt.condition.left.name.valor, stmt.condition.operator, stmt.condition.right.value)
+         #print("Condicion : ",stmt.condition,stmt.condition.left.name.valor, stmt.condition.operator, stmt.condition.right.value)
          self.execute(stmt.body)
 
       return None
@@ -194,9 +193,9 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)
-      print("::: left = ",left)
+      #print("::: left = ",left)
       right = self.evaluate(expr.right)
-      print("::: right = ",right)
+      #print("::: right = ",right)
 
       match expr.operator.tipo:
          case TokenType.BANG_EQUAL:
@@ -234,5 +233,23 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
       ## Unreachable
       return None
+
+   def visit_call_expr(self, expr: expressions.Call):
+      import LoxCallable # Inside import
+      callee : any = self.evaluate(expr.callee)
+
+      arguments : List[any] = []
+      for argument in expr.arguments:
+         arguments.append(self.evaluate(argument))
+
+      if not isinstance(LoxCallable, callee):
+         raise RuntimeError(expr.paren,"Can only call functions and classes.")
+      
+      function : LoxCallable = LoxCallable(callee)
+      if len(arguments) is not function.arity():
+         raise RuntimeError(expr.paren,"Expected "+function.arity()+
+         " arguments but got "+len(arguments)+".")
+
+      return function.call(self,arguments)
 
          

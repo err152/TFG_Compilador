@@ -145,7 +145,25 @@ Una primera aproximación a implementar el scoping podría funcionar así:
 
 Esto no funciona del todo bien. Cuando una variable local tiene el mismo nombre que una variable en dentro de un scope, esta hace sombra a la exterior de manera que ya no puede acceder a esta otra, pero sigue estando ahí y volverá una vez se ejecute el scope.
 
-Se añade a la clase Entorno un atributo de su mismo tipo y se crean constructores para inicializarlo. También se modifican los métodos get() y assign() de manera que busquen las variables en el entorno y si no las encuentran comprueben el entorno exterior de forma recursiva.
+En este caso se ha utilizado una implementación distinta a la del libro ya que esta no daba buenos resultados a la hora de recuperar el contexto al salir de un scope.
+
+Lo que se ha hecho es lo siguiente:
+
+- Se ha añadido un atributo de tipo lista llamado stack en el que se almacenan los distintos Entornos según se avanza en el código.
+
+- Se han definido dos nuevas funciones:
+  
+  -  enter_scope: en el cual se guardan las variables y sus valores en el stack en forma de Entorno y se crea un nuevo diccionario de valores Values.
+  
+  - exit_scope: se hace pop sobre el stack eliminando el último entorno existente, y con el sus variables y modificaciones sobre valores.
+
+- Se han modificado los métodos get y assign para que recorran este stack en busca de las variables a la hora de buscarlas para retornarlas o modificarlas.
+
+- En el Intérprete, el método executeBlock ya no recibe un entorno como parámetro.
+
+- La gestión de los distintos entornos creados por los scopes se gestionan ahora en la clase Entorno por lo que el método executeBlock tan solo llama a enter_scope() para guardar el entorno, ejecuta los statements que contiene el bloque y llama a exit_scope() para recuperar el entorno anterior.
+
+
 
 ## 9. Control de Flujo
 
@@ -163,7 +181,7 @@ Esto se puede probar escribiendo un simulador de maquinas de Turing en tu lengua
 
 Si tu lenguaje puede hacerlo, se le considera Turing-completo. Las máquinas de Turing son muy simples, solamente se necesita aritmética, un poco de control de flujo y la habilidad de asignar y utilizar cantidades arbitrarias de memoria. Se tiene lo primero, ahora iremos a por lo segundo.
 
-## 9.2. Ejecución Condicional
+#### 9.2. Ejecución Condicional
 
 Podemos dividir el control de flujo en dos tipos:
 
@@ -203,11 +221,7 @@ assignment     → IDENTIFIER "=" assignment
 logic_or       → logic_and ( "or" logic_and )* ;
 logic_and      → equality ( "and" equality )* ;
 
-
-
 Se añade al generador y en el parser ahora assignment() en vez de llamar a equality() llamará a orr(). Se definen los métodos orr() y andd(). Y en el intérprete se añade el método visit_logical_expr() después de visit_literal_expr().
-
-
 
 #### 9.4. Bucles While
 
@@ -222,3 +236,30 @@ statement      → exprStmt
 whileStmt      → "while" "(" expression ")" statement ;
 
 Se añade While al generador,al parser con su método whileStatement(), y al intérprete con el método visit_while_stmt().
+
+#### 9.5. Bucles For
+
+Por último falta implementar el bucle for cuya gramática sería la siguiente:
+
+statement      → exprStmt
+                       | forStmt
+                       | ifStmt
+                       | printStmt
+                       | whileStmt
+                       | block ;
+
+forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                         expression? ";"
+                         expression? ")" statement ;
+
+Dentro del paréntesis se tiene:
+
+- Una inicialización, que se ejecuta una única vez y suele ser una expresión pero se permitirá que sea una variable.
+
+- Una condición, que se ejecuta una vez al comienzo de cada iteración y controla cuando salir del bucle.
+
+- Un incremento, que es una expresión arbitraria que realiza algún tipo de trabajo al final de cada iteración.
+
+En verdad Lox no necesita bucles for, se podría hacer lo mismo con un bucle while, pero es más conveniente y más dinámico tenerlo por separado.
+
+Añadimos al parser un método forStatement() que gestiona estos elementos del bucle for y llama a statement para el cuerpo del bucle.
