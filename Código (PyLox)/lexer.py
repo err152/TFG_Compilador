@@ -39,6 +39,9 @@ class Lexer:
                 estado = nuevo_estado
                 
         if estado not in ('inicial','ERROR','ESPACIO','COMMENT_'):
+            if estado == 'NUMBER':
+                num = float(self.token_actual())
+                yield Token(self.linea,TokenType[estado],num)
             yield Token(self.linea,TokenType[estado],self.token_actual())
 
     

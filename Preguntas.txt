@@ -1,4 +1,7 @@
 Cambiar token nil a None para que sea más claro. true a True tambien?
+La implementación de la ejecución de bloques donde no se pasa el entorno como parámetro si no que sea crea
+dentro, quizás no funcione cuando la llamada a executeBlock se realiza de forma recursiva desde otra clase
+que no sea Interprete que ya tiene su entorno. (Solucionar prueba_func2.lox y prueba_func8.lox)
 
 TODO:
 - test unitarios de parser e interprete a ficheros como en la asignatura .out .try (realcionar con DRY en 

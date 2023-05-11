@@ -1,6 +1,7 @@
 from Token import Token,TokenType
 from Entorno import Entorno
 from typing import List
+from Return import Return
 #import LoxCallable
 import expressions
 import statements
@@ -18,6 +19,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       self.ent = Entorno()
    
    def stringify(self, obj:any) -> str:
+      from LoxFunction import LoxFunction
       if obj == None:
          return None
       if self.is_number(obj):
@@ -51,7 +53,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       try:
          float(obj)
          return True
-      except ValueError:
+      except (ValueError,TypeError):
          return False
 
    def is_truthy(self, obj: any) -> bool:
@@ -81,6 +83,12 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    def visit_expression_stmt(self,stmt: statements.Expression):
       value = self.evaluate(stmt.expression)
       return None
+   
+   def visit_function_stmt(self,stmt:statements.Function):
+      from LoxFunction import LoxFunction
+      funct : LoxFunction = LoxFunction(stmt)
+      self.ent.define(stmt.name.valor, funct)
+      return None
 
    def visit_if_stmt(self, stmt: statements.If):
       if self.is_truthy(self.evaluate(stmt.condition)):
@@ -93,6 +101,13 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       value = self.evaluate(stmt.expression)
       print(self.stringify(value))
       return None
+   
+   def visit_return_stmt(self, stmt:statements.Return):
+      value = None
+      if stmt.value is not None:
+         value = self.evaluate(stmt.value)
+         
+      raise Return(value)
 
    def visit_var_stmt(self,stmt: statements.Var):
       value : any = None
@@ -191,17 +206,22 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       return None
 
    def visit_call_expr(self, expr: expressions.Call):
-      import LoxCallable # Inside import
+      from LoxCallable import LoxCallable # Inside import
+      from LoxFunction import LoxFunction
       callee : any = self.evaluate(expr.callee)
 
       arguments : List[any] = []
       for argument in expr.arguments:
          arguments.append(self.evaluate(argument))
 
-      if not isinstance(LoxCallable, callee):
+      if not isinstance(callee, LoxCallable):
          raise RuntimeError(expr.paren,"Can only call functions and classes.")
       
-      function : LoxCallable = LoxCallable(callee)
+      function : LoxCallable
+      if isinstance(callee, LoxFunction):
+         function = callee
+      else:
+         function = cast(LoxCallable, callee)
       if len(arguments) is not function.arity():
          raise RuntimeError(expr.paren,"Expected "+function.arity()+
          " arguments but got "+len(arguments)+".")

@@ -81,7 +81,9 @@ class Parser:
             return expressions.Literal(True) # True, true o TRUE ¿?
         if self.match(TokenType.NIL):
             return expressions.Literal(None)
-        if self.match(TokenType.NUMBER,TokenType.STRING):
+        if self.match(TokenType.NUMBER):
+            return expressions.Literal(float(self.previous().valor))
+        if self.match(TokenType.STRING):
             return expressions.Literal(self.previous().valor)
         if self.match(TokenType.IDENTIFIER):
             return expressions.Variable(self.previous())
@@ -105,7 +107,7 @@ class Parser:
         if not self.check(TokenType.RIGHT_PAREN):
             while True:
                 arguments.append(self.expression())
-                if self.match(TokenType.COMMA):
+                if not self.match(TokenType.COMMA):
                     break
 
         paren : Token = self.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
@@ -156,6 +158,8 @@ class Parser:
 
     def declaration(self) -> Stmt:
         try:
+            if self.match(TokenType.FUN):
+                return self.function("function")
             if self.match(TokenType.VAR):
                 return self.varDeclaration()
             return self.statement()
@@ -170,6 +174,8 @@ class Parser:
             return self.ifStatement()
         if self.match(TokenType.PRINT):
             return self.printStatement()
+        if self.match(TokenType.RETURN):
+            return self.returnStatement()
         if self.match(TokenType.WHILE):
             return self.whileStatement()
         if self.match(TokenType.LEFT_BRACE):
@@ -227,6 +233,15 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Print(value)
+    
+    def returnStatement(self):
+        key : Token = self.previous()
+        value : Expr = None
+        if not self.check(TokenType.SEMICOLON):
+            value = self.expression()
+        
+        self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+        return statements.Return(key, value)
 
     def varDeclaration(self) -> Stmt:
         name : Token = self.consume(TokenType.IDENTIFIER,"Expect variable name.")
@@ -248,6 +263,26 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Expression(expr)
+    
+    def function(self, kind : str) -> statements.Function:
+        name : Token = self.consume(TokenType.IDENTIFIER,"Expect "+kind+" name.")
+        
+        # Gestión de los parámetros
+        self.consume(TokenType.LEFT_PAREN,"Expect '(' after "+kind+" name.")
+        params : List[Token] = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(params) >= 255:
+                    self.error(self.peek(), "Can't have more than 255 parameters.")
+                params.append(self.consume(TokenType.IDENTIFIER,"Expect parameter name."))
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_PAREN,"Expect ')' after parameters.")
+        
+        # Gestión del cuerpo
+        self.consume(TokenType.LEFT_BRACE, "Expect '{' before "+kind+" body.")
+        body : List[Stmt] = self.block()
+        return statements.Function(name,params,body)
 
     def block(self) -> List[Stmt]:
         statements : List[Stmt] = []
