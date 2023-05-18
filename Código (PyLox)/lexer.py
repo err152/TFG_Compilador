@@ -76,20 +76,29 @@ class Lexer:
             else:
                 return 'COMMENT_'
 
-        elif estado not in ('STRING_','NUMBER_','IDENTIFIER') and (caracter.isspace()
+        elif estado not in ('STRING_1','STRING_2','NUMBER_','IDENTIFIER') and (caracter.isspace()
                                            or caracter == '\n'): 
             if caracter == '\n':
                 self.linea += 1
             return 'ESPACIO'
 
-        elif estado == 'inicial' and (caracter == '"' or caracter == "'"):
-            return 'STRING_'
+        elif estado == 'inicial' and caracter == '"':
+            return 'STRING_1'
+        
+        elif estado == 'inicial' and caracter == "'":
+            return 'STRING_2'
             
-        elif estado == 'STRING_':
-            if caracter == '"' or caracter == "'":
+        elif estado == 'STRING_1':
+            if caracter == '"':
                 return 'STRING'
-            elif caracter != '"' or caracter != "'":
-                return 'STRING_'
+            elif caracter != '"':
+                return 'STRING_1'
+            
+        elif estado == 'STRING_2':
+            if caracter == "'":
+                return 'STRING'
+            elif caracter != "'":
+                return 'STRING_2'
 
         elif estado == 'inicial' and caracter.isdigit():
             return 'NUMBER'

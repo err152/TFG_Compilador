@@ -86,7 +86,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    def visit_function_stmt(self,stmt:statements.Function):
       from LoxFunction import LoxFunction
-      funct : LoxFunction = LoxFunction(stmt)
+      funct : LoxFunction = LoxFunction(stmt,self.ent)
       self.ent.define(stmt.name.valor, funct)
       return None
 

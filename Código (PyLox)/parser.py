@@ -374,5 +374,5 @@ if __name__ == '__main__':
     #print("El token 0 es ",pars.tokens[0]," y su tipo es ",TokenType(pars.tokens[0].tipo))
     #print(f"-- tokens in parser : {pars.tokens}")
     expr = pars.parse()
-    print(f"-- expr : {expr}")
+    #print(f"-- expr : {expr}")
 

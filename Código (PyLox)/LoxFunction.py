@@ -7,8 +7,9 @@ from Return import Return
 
 class LoxFunction(LoxCallable):
     
-    def __init__(self, stat : statements.Function):
+    def __init__(self, stat : statements.Function, clos : Entorno):
         self.declaration = stat
+        self.closure : Entorno = clos
         
     def __str__(self) -> str:
         return "<fn "+self.declaration.name.valor+">"
@@ -17,7 +18,7 @@ class LoxFunction(LoxCallable):
         return len(self.declaration.params)
         
     def call(self, inter : Interprete, argu : List[any]):
-        ento : Entorno = Entorno(inter.ent)
+        ento : Entorno = Entorno(self.closure)
         i = 0
         while i < len(self.declaration.params):
             ento.define(self.declaration.params[i].valor,argu[i])
