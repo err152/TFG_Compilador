@@ -9,6 +9,7 @@ from lexer import Lexer
 from Interprete import Interprete,LoxRuntimeError
 from Token import Token,TokenType
 import AstPrinter
+from Resolver import Resolver
 
 class Lox:
     hadError = False
@@ -30,8 +31,14 @@ class Lox:
 
         pars = Parser(tokens)
         stmts = pars.parse()
-        
+                
         inter = Interprete()
+        
+        #res = Resolver(inter)
+        #res.resolve(statements=stmts)
+        #if self.hadError:
+        #    return
+        
         inter.interpret(stmts)
     
 
@@ -60,7 +67,7 @@ class Lox:
 
 def main(args):
     
-    Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\b4sur4\\prueba_bind1.lox')
+    Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\b4sur4\\prueba_func9.lox')
     '''
     if len(args) > 1:
         print("Usage: jlox [script]")

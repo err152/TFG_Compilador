@@ -108,17 +108,11 @@ Pero en Lox las declaraciones de funciones son permitidas en cualquier lugar dó
 
 Denominamos **cierre** (closure) a una combinación de una función y el entorno léxico dentro del cual se define esa función. Es un concepto poderoso que permite a las funciones "recordar" y acceder a variables de su ámbito externo incluso después de que ese ámbito haya terminado de ejecutarse.
 
-
-
 Se añade en LoxFunction un nuevo entorno de cierre "closure". En el intérprete cuando se crea una función, se captura el entorno actual. Finalmente, cuando se llama a la funión call(), se utiliza este entorno de cierre como padre en vez de ir directamente al entorno global.
-
-
 
 ## 11. Resolución y vinculación
 
 Un brecha se ha producido en nuestro barco al implementar los cierres.
-
-
 
 #### 11.1. Static Scope
 
@@ -151,8 +145,6 @@ Si estas familiarizado con scopes y closures el resultado debería ser "global" 
 
 Pero en este caso se devuelve "global" "block".
 
-
-
 #### 11.2. Análisis Semántico
 
 Nuestro intérprete resuelve una variable cada vez que la expresión variable es evaluada. Si esta variable está dentro de un bucle que se ejecuta 100 veces, la variable será resuelta 100 veces.
@@ -169,8 +161,61 @@ En este paseo se visitan todos los nodos, pero un análisis estático es diferen
 
 - No tiene control de flujo. Los bucles son visitados una única vez. Ambas ramas son visitadas en los bucles if. Los operadores lógicos no son cortocircuitados.
 
-
-
 #### 11.3. Una clase Resolver
 
-Se crea una nueva clase Resolver.
+Se crea una nueva clase Resolver. Ala hora de resolver variables solo interesan un par de nodos:
+
+- La declaración de un bloque introduce un nuevo scope para las declaraciones que contiene.
+
+- La declaración de una función introduce un nuevo scope para su cuerpoy vincula sus parámetros a este scope.
+
+- La declaración de una variable añade la variable al scope actual.
+
+- Las expresiones de variables y asignaciones necesitan tener sus variables resueltas.
+
+El resto de nodos no hacen nada especial, aunque se tendrán que visitar de todas formas para recorrer el árbol.
+
+Empezando por los bloques se crea un método resolve() que pasada una lista de declaraciones llama a resolve() para cada una de ellas. A su vez si esta recibe una declaracion o una expresion llama a sus métodos acepta() para ser resueltas.
+
+Se crea ahora un método visit_block_stmt() en el que se llama a beginScope(), función que guarda un diccionario vacío en una lista scopes que tiene la clase Revolver() como atributo. Seguido, llama a resolve para la lista de declaraciones, y luego llama a endScope(), función que extrae un diccionario de la lista scopes.
+
+Para la declaracion de variables se diferencia entre la declaración y la definición. Se añade un nuevo método visit_var_stmt() que llama a declare(), resuelve la variable y llama a define().
+
+¿Qué ocurre cuando el inicializador de una variable local hace referencia a una 
+variable con el mismo nombre que la variable que se está declarando? Se tienen diferentes formas de actuar:
+
+1. Inicializar y luego añadir la nueva variable en el scope.
+
+2. Añadir la nueva variable al scope y luego inicializarla.
+
+3. Que esto devuelva un error.
+
+Como las priemras tienden a producir errores de usuario, se implementará la tercera.
+
+Primero se define la declaración que agrega la variable al scope más interno, de manera que  oculta cualquier scope externo y así sabemos que la variable existe.  La marcamos como "no lista todavía" al vincular su nombre a `False` en el diccionario scope.
+
+Se crea ahora el método visit_var_expr(), en el que primero se comprueba si la variable está siendo accedida desde dentro de su inicialización. Si la variable existe en actual scope pero tiene valor False, se retorna un error. Si no, se llama a resolveLocal(), función que de manera similar al Entorno busca desde el scope actual hacia arriba en busqueda de la variable, si se encuentra se resuelve pasandole el número de saltos entre scopes que se han realizado.
+
+Para las asignaciones, tan solo se resuelve la expresion en visit_assign_expr.
+
+Para las funciones, se declara y define la declaración y se llama a la funcion resolveFunction(), la cual abre un scope, declara y define los parámetros de la función, resuelve el cuerpo de esta y cierra el scope.
+
+Finalmente, se añaden los demás nodos en los que no se hace nada especial más allá de resolver sus diferentes componentes.
+
+
+
+#### 11.4. Interpretando Variables Resueltas
+
+Veamos de que sirve el Resolver. Cada vez que se visita una variable, comunica al interprete el número de scopes que hay entre el actual y donde está definida la variable. Creamos un método resolve() que guarde en una lista *locals* las expresiones y el numero de salto para acceder a ellas.
+
+Se modifica visit_var_expr() para que llame a una nueva función lookUpVariable() que comprueba en *locals* la distancia de la expresion que se va a tratar. Si la distancia no es nula llama a getAt() de lo contrario toma el valor de *globals*. La función getAt() devuelve el valor de la variable que le retorna ancestor(), función que devuelve el entorno a x saltos, pasandose x como parámetro.
+
+De igual manera hacemos con visit_assign_expr(), en este caso llamando a assignAt() que también llamará a ancestor().
+
+Finalmente, se añade al programa principal la definición del resolver y llamamos a resolve() antes que al interpret().
+
+
+
+#### 11.5. Errores de Resolución
+
+Se añade control de erores al Resolver para los casos en los que en un scope local se crean dos variables con un mismo nombre, y para prevenir llamadas return fuera de ningún scope.

@@ -17,6 +17,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def __init__(self):
       self.ent = Entorno()
+      self.locals = [expressions.Expr,int]
    
    def stringify(self, obj:any) -> str:
       from LoxFunction import LoxFunction
@@ -66,6 +67,9 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    def execute(self,stmt: statements.Stmt):
       stmt.acepta(self)
+      
+   def resolve(self,expr:expressions.Expr,depth:int):
+      self.locals.append(expr,depth)
 
    def executeBlock(self,state:List[statements.Stmt]):
       self.ent.enter_scope()
@@ -123,8 +127,11 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
       return None
 
-   def visit_assign_expr(self,expr:expressions.Assign):
+   def visit_assign_expr(self,expr:expressions.Assign): ## 
       value : any = self.evaluate(expr.value)
+      #if distance is not None:
+      #   self.ento.assignAt(distance,expr.name,value)
+      #else:
       self.ent.assign(expr.name,value)
       return value
 
@@ -163,6 +170,14 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def visit_variable_expr(self,expr:expressions.Variable):
       return self.ent.get(expr.name)
+      #return self.lookUpVariable(expr.name,expr)
+   
+   def lookUpVariable(self,name:Token,expr:expressions.Expr):
+      distance : int = self.locals[expr]
+      if distance is not None:
+         return self.ent.getAt(distance,name.valor) # enviroment?
+      else:
+         return self.ent.get(name) # globals? esto no funcionará
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)

@@ -4,11 +4,27 @@ class Entorno:
    values = {}
    stack = []
 
-   def __init__(self,value=None):
-      self.enclose = value
+   #def __init__(self,value=None):
+      #self.enclose = value
+      #self.stack.append(value.values)
+      #self.values = dict()
+      
    
-   def define(self, name:str, value:any):
+   def define(self, name:str, value:any): ##
       self.values[name] = value
+      
+   def ancestor(self,distance:int): ##
+      ento = self
+      i = 0
+      while i < distance:
+         ento = ento.enclose # stack? enclose?
+         i = i + 1
+      
+   def getAt(self, distance:int, name:str): ##
+      return self.ancestor(distance).values[name]
+   
+   def assignAt(self, distance:int, name:Token, value:any): ##
+      self.ancestor(distance).values.append(name.valor,value)
 
    def get(self, name:Token) -> any:
       if name.valor in self.values:
