@@ -6,6 +6,7 @@ from Return import Return
 import expressions
 import statements
 
+
 class LoxRuntimeError(RuntimeError):
    token = None
 
