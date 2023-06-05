@@ -241,6 +241,6 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          raise RuntimeError(expr.paren,"Expected "+function.arity()+
          " arguments but got "+len(arguments)+".")
 
-      return function.call(self,arguments)
+      return function.call(self,arguments,self.ent)
 
          

@@ -4,12 +4,13 @@ import statements
 from Interprete import Interprete
 from Entorno import Entorno
 from Return import Return
+from copy import deepcopy
 
 class LoxFunction(LoxCallable):
     
     def __init__(self, stat : statements.Function, clos : Entorno):
         self.declaration = stat
-        self.closure : Entorno = clos
+        self.closure : Entorno = deepcopy(clos)
         
     def __str__(self) -> str:
         return "<fn "+self.declaration.name.valor+">"
@@ -17,19 +18,22 @@ class LoxFunction(LoxCallable):
     def arity(self) -> int:
         return len(self.declaration.params)
         
-    def call(self, inter : Interprete, argu : List[any]):
+    def call(self, inter : Interprete, argu : List[any], entorno : Entorno):
         #ento : Entorno = Entorno(self.closure)
+        #(self.closure.all_variables_defined())
+        entorno.closure_function = deepcopy(self.closure)
+        self.closure = entorno
         self.closure.enter_scope()
-        i = 0
-        while i < len(self.declaration.params):
-            self.closure.define(self.declaration.params[i].valor,argu[i])
-            i = i+1
+        for par, arg1 in zip(self.declaration.params, argu):
+            self.closure.define(par.valor,arg1)
+
         try:
             inter.executeBlock(self.declaration.body)
         except Return as returnValue:
             return returnValue.value
         finally:
             self.closure.exit_scope()
+            self.closure = entorno.closure_function
         return None
         
     

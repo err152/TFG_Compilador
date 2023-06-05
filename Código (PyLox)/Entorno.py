@@ -1,11 +1,12 @@
 from Token import Token,TokenType
 
 class Entorno:
-   values = {}
-   stack = []
+   
+   closure_function = None
 
-   #def __init__(self,value=None):
-      #self.enclose = value
+   def __init__(self):
+      self.values = {}
+      self.stack = []
       #self.stack.append(value.values)
       #self.values = dict()
       
@@ -33,7 +34,7 @@ class Entorno:
       for i in reversed(self.stack):
          if name.valor in i:
             return i.get(name.valor)
-
+      return self.closure_function.get(name)
       raise RuntimeError(name,"Undefined variable '"+name.valor+"'.")
 
    def assign(self, name:Token,value:any):
@@ -46,6 +47,9 @@ class Entorno:
             i[name.valor] = value
             break
       else:
+         if self.closure_function is not None:
+            self.closure_function.assign(name, value)
+            return
          raise RuntimeError(name,"Undefined variable '"+name.valor+"'.")
    
    def enter_scope(self):
@@ -53,5 +57,5 @@ class Entorno:
       self.values = dict()
       
    def exit_scope(self):
-      self.values = self.stack.pop()
-   
+      self.values = self.stack.pop()     
+ 

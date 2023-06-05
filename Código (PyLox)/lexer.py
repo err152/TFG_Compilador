@@ -72,6 +72,7 @@ class Lexer:
         elif estado == 'COMMENT_':
             if caracter == '\n':
                 self.linea += 1
+                self.inicio = self.pos+1
                 return 'inicial'
             else:
                 return 'COMMENT_'
