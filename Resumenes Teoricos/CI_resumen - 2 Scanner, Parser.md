@@ -2,302 +2,17 @@
 
 #### Mi resumen: por Eduardo del Rio Ruiz
 
-
-
-## 1. Introducción
-
-Se va a crear un interprete de un lenguaje de programación llamado Lox, un "lenguaje de dominio específico". A priori, programar un idioma es un tarea muy compleja que iremos resolviendo poco a poco.
-
-El libro se divide en 3 secciones:
-
-- Sección de introducción al lenguaje Lox y la terminología utilizada en la programación de lenguajes.
-- Otras dos secciones que implementan ambas un interprete distinto del lenguaje Lox.
-
-Tras cada capítulo tendremos un programa funcional que, con el paso de los capítulos, crecerá hasta cubrir por completo un lenguaje.
-
-Al final de cada capítulo tendremos ejercicios presentados como retos para ampliar nuestro conocimiento.
-
-A diferencia del libro, yo implementaré el interprete plox en python, en vez de en java o en C.
-
-------
-
-
-
-
-
-## 2. Mapa de del Territorio
-
-"You must have a map, no matter how rough.
-Otherwise you wander all over the place. In “The
-Lord of the Rings” I never made anyone go
-farther than he could on a given day." - J.R.R. Tolkien
-
-Nuestro programa comenzará siendo un código fuente crudo compuesto por cadenas de caracteres. Cada fase analiza el programa y lo transforma en una representación de una capa superior donde la semántica irá tomando forma.
-
-Llegados a la cima, tenemos ya un programa de usuario con un código ya comprensible. Ahora, mientras bajamos, transformaremos el codigo ya de alto nivel en uno más de bajo nivel hasta que llegar a algo que sepamos como ejecuta la CPU.
-
-![image-20220403201402745](C:\Users\Eduardo\AppData\Roaming\Typora\typora-user-images\image-20220403201402745.png)
-
-#### 
-
-#### Scanning (Lexing/Lexical Analysis)
-
-Un '**lexer**' toma un flujo de caracteres y lo transforma en una serie de '**tokens**' (palabras). Estos tokens pueden ser uno o varios caracteres, ya sean literales, numeros, palabras, etc... Se ignoraran los comentarios y los espacios entre palabras.
-
-![image-20220403202134336](C:\Users\Eduardo\AppData\Roaming\Typora\typora-user-images\image-20220403202134336.png)
-
-
-
-#### Parsing
-
-Aquí nuestra sintaxis toma una gramática. Un '**parser**' toma una secuencia de tokens y crea una estructura en árbol (parse tree/abstract syntax tree) que imita la naturaleza anidada de una gramática. En esta parte se reportan los '**syntax errors**' o errores de sintaxis.
-
-![image-20220403202143315](C:\Users\Eduardo\AppData\Roaming\Typora\typora-user-images\image-20220403202143315.png)
-
-
-
-#### Análisis Estático¿?
-
-El primer análisis que suele realiza un lenguaje se denomina '**binding**' (vinculación) o **resolución**. Para cada **identificador** buscamos donde está definido ese nombre y lo enlazamos.
-
-Aquí se lleva a cabo el '**scope**', donde dentro de una región en el código fuente un cierto nombre puede usarse para hacer referencia a una declaración específica.
-
-Aquí también generaremos los '**type errors**' cuando se realice una operación entre variables de un tipo que no aguantan dicha operación.
-
-La información se puede almacenar como **atributo** en el arbol sintáctico; en una **tabla de símbolos**; o en una estructura de datos completamente nueva.
-
-Hasta aquí el *front end* del interprete.
-
-
-
-#### Representación Intermedia
-
-Representación de nuestro interprete entre el front end y back end, que nos permite el soporte de multiples lenguajes fuente, creando un front end para cada lenguaje, un back end para cada lenguaje y luego conectandolos a gusto.
-
-
-
-#### Optimization
-
-Optimizar el código. Ejemplo '**constant folding**': remplazar la inicialización de una variable como operación de constantes por el valor de la operación.
-
-
-
-#### Generación de Código
-
-Comienza el *back end*. Transformamos el código fuente en código máquina poco a poco, teniendo en dónde deseamos ejecutar nuestro programa. El código generado para correr en una VM se denomina '**bytecode**'.
-
-
-
-#### Máquina Virtual
-
-Todavía falta generar desde el bytecode el código máquina para que sea ejecutado por el chipset específico de la máquina en cuestión.
-
-
-
-#### Runtime
-
-Hora de ejecutar el programa y ver el resultado final!
-
-
-
-
-
-Tenemos 3 rutas alternativas:
-
--  Single-pass compilers: entrelaza parsing, analisis y generación de código generando código ejecutable directamente desde el parser.
-- Tree-walk interpreters: ejecuta codigo justo despues del parsing, recorriendo el árbol sintáctico rama por rama y hoja por hoja linealmente.
-- Transpilers: a la hora de 'bajar de nivel' a nuestro código podemos tratar de generar un código homólogo en otro idioma de alto lenguaje distinto, y utilizar las herramientas de compilación ya existentes de este para generar el código máquina.
-- JIT:
-
-
-
-#### Compiladores e Interpretes
-
-Compilar es una técnica de implementación que trata de traducir un lenguaje fuente a otra forma, normalmente a nivel inferior. 
-
-Un intérprete además de traducir el lenguaje lo ejecuta.
-
-------
-
-
-
-## 3. El lenguaje Lox
-
-```c
-// Your first Lox program!
-print "Hello, world!";
-```
-
-Lox se escribe dinámicamente. Las variables pueden almacenar valores de cualquier tipo, o incluso una variable puede almacenar varios datos de distinto tipo.
-
-A la hora de gestionar la memoria de forma automática tenemos dos opciones: '**reference counting**' o **tracing garbage collection**'. En nuestro caso utilizaremos el garbage collection ya que reference counting tiene varias limitaciones.
-
-Como tipos de datos tenemos:
-
-- **Booleans**: 'true' y 'false'.
-- **Números**: flotantes de doble precision. '1234' o '12.34'.
-- **Strings**: "I am a string".
-- **Nil**: representa un valor nulo. 'nil'.
-
-Expresiones:
-
-- **Aritméticas**: sólo aplicables a números
-     - Operaciones binarias: x+y, x-y, x*y, x/y
-     - Operaciones no binarias: -x
-
-- **Comparación e igualdad**:
-
-  - Comparación: x<y, x<=y, x>y, x>=y (solo números) 
-
-  - Igualdad: x == y, "x" != "y", x == "y"
-
-    
-
-- **Operadores Lógicos**: ! , and, or+
-
-- **Precedencia y agrupación**: la precedencia es la misma a lenguajes como C o Java, si se quiere modificar se puede utilizar () .
-
-Sentencias:
-
-Terminadas en ; tienen como objetivo devolver un valor.
-
-Si se desea empaquetar una serie de sentencias en una sola se pueden rodear de {} afectando al scoping.
-
-```c
-{
-print "One statement.";
-print "Two statements.";
-}
-```
-
-Variables:
-
-Las variables se declaran utilizando sentencias var, si no se inicializan de forma predeterminada valen nil.
-
-```c++
-var imAVariable = "here is my value";
-var iAmNil;
-var breakfast = "bagels";
-print breakfast; // "bagels".
-breakfast = "beignets";
-print breakfast; // "beignets".
-```
-
-Control de Flujo:
-
-```c
-if (condition) {
-print "yes";
-} else {
-print "no";
-}
-```
-
-```c
-var a = 1;
-while (a < 10) {
-print a;
-a = a + 1;
-}
-```
-
-```c
-for (var a = 1; a < 10; a = a + 1) {
-print a;
-}
-```
-
-Funciones:
-
-Se definen funciones con fun
-
-```c++
-makeBreakfast(bacon, eggs, toast);
-makeBreakfast();
-
-fun printSum(a, b) {
-print a + b;
-}
-```
-
-Clausuras:
-
-```c++
-fun identity(a) {
-return a;
-}
-print identity(addPair)(1, 2); // Prints "3".
-```
-
-Clases:
-
-Por que un lenguaje orientado a objetos? La mayoría del código que circula por internet actualmente es en algún lenguaje orientado a objetos y esto se debe a que puede ser bastante útil a la hora de definir tipos de datos complejos. Además de esta forma nuestro intérprete se podría considerar 'más completo'.
-
-```c++
-class Breakfast {
-	cook() {
-		print "Eggs a-fryin'!";
-	}
-	serve(who) {
-		print "Enjoy your breakfast, " + who + ".";
-	}
-}
-```
-
-Instancias e inicialización:
-
-Lox permite añadir propiedades a los objetos de forma libre:
-
-```c++
-breakfast.meat = "sausage";
-breakfast.bread = "sourdough";
-```
-
-Y para acceder a estas propiedades desde dentro de un método utiliza el *this* de toda la vida:
-
-```c++
-class Breakfast {
-	serve(who) {
-		print "Enjoy your " + this.meat + " and " +
-		this.bread + ", " + who + ".";
-	}
-	// ...
-}
-```
-
-Herencia:
-
-Herencia singular mediante el operador '<'
-
-```c++
-class Brunch < Breakfast {
-	drink() {
-		print "How about a Bloody Mary?";
-	}
-}
-
-var benedict = Brunch("ham", "English muffin");
-benedict.serve("Noble Reader");
-```
-
-Al igual que en java para el método init utilizamos super :
-
-```c++
-class Brunch < Breakfast {
-	init(meat, bread, drink) {
-		super.init(meat, bread);
-		this.drink = drink;
-	}
-}
-```
-
-------
-
-
+Scanning/Representando el Codigo/Parsing Expressions
 
 ## 4. Scanning
 
 Este es el primer paso de cualquier intérprete. El scanner toma un código fuente como una serie de caracteres y los agrupa en lo que llamamos **lexemas**, los cuales tratados como información de un tipo concreto y en un contexto se convierten en **tokens**.
+
+#### 4.1. Framework
+
+Antes que nada se desarrolla una primera versión del interprete. Se crea para ello un programa al que llamamos Lox.py el cual será el encargado de leer el programa en lenguaje Lox como cadena de caracteres y llamar a las distintas partes de nuestro Interprete. Este acepta el código de 3 maneras distintas: por terminal como parámetro, interactivamente por el terminal si no se le pasa ningún parámetro, o pasándole una ruta al fichero en el que se encuentre el código a procesar. Además este contará con una simple gestión de errores.
+
+#### 4.2. Lexemas y Tokens
 
 Se definen 3 tipos de token: IDENTIFICADOR, NUMERO, STRING
 
@@ -311,7 +26,7 @@ class Token:
         self.linea = linea
         self.tipo = tipo
         self.valor = valor
-        
+
     def __repr__(self):
         return f'[{self.linea},"{self.tipo}",{self.valor}]'
 
@@ -381,6 +96,12 @@ MULTI_CHARS: Tuple[str] = ('!', '!=', '=', '==', '>', '>=', '<', '<=')
 
 Los tokens son tuplas compuestas de un número de línea, el tipo al que pertenecen y un valor dentro del tipo. Se definen todos los caracteres posibles bajo su nombre de tipo para poder utilizarlos a gusto en le resto del código.
 
+#### 4.3. Lenguajes Regulares
+
+Comentar movidas de regex?
+
+#### 4.4. Clase Lexer
+
 Una vez definidos, ahora dada una cadena de caracteres debemos desarrollar un programa **lexer.py** que lea caracter a caracter y vaya identificando los distintos tipos de tokens según avance.
 
 ```python
@@ -409,18 +130,18 @@ class Lexer:
                     yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 estado = 'inicial'
-                
+
             elif nuevo_estado == 'ESPACIO':
                 if estado not in ('inicial','ERROR','ESPACIO'):
                     yield Token(self.linea,estado,self.token_actual())
                 self.inicio = self.pos
                 self.pos += 1
                 estado = nuevo_estado
-                
+
             else:
                 self.pos += 1
                 estado = nuevo_estado
-                
+
         if estado not in ('inicial','ERROR','ESPACIO'):
             yield Token(self.linea,estado,self.token_actual())
 
@@ -445,7 +166,7 @@ class Lexer:
 
         elif estado == 'inicial' and (caracter == '"' or caracter == "'"):
             return 'STRING_'
-            
+
         elif estado == 'STRING_':
             if caracter == '"' or caracter == "'":
                 return 'STRING'
@@ -460,7 +181,7 @@ class Lexer:
                 return 'NUMERO'
             elif caracter == '.':
                 return 'NUMERO_'
-            
+
         elif estado == 'NUMERO_':
             if caracter.isdigit():
                 return 'NUMERO'
@@ -471,7 +192,7 @@ class Lexer:
             midd = self.entrada[self.inicio:self.pos+1]
             if midd in KEYWORDS:
                 return TokenType(midd).name
-            
+
             return 'IDENTIFICADOR'
 
         else:
@@ -483,8 +204,6 @@ Este programa cuenta con unos atributos llamados pos, inicio y linea que respect
 En la función devuelve_token se avanza caracter a caracter aumentando pos hasta reconocer que ha terminado el token llamando a la funcion transición en cada iteración, devolviendo los caracteres del inicio hasta la posicion actual, junto a la linea (que también irá aumentando según se lea el caracter \n).
 
 La función transición es la que se encarga de ir reconociendo los caracteres e interpretarlos como los distintos tipos de tokens que tenemos, comprobando el caracter actual o los leídos desde el inicio hasta la posición actual, y devolviendo el tipo de Token en forma de string.
-
-
 
 ## 5. Representando el código
 
@@ -498,7 +217,7 @@ Donde A es la **cabeza** y esta se transforma en el **cuerpo** Bc siendo B una *
 
 En nuestra notación también se utilizarán los siguientes simbolos:
 
-- A → b | c | d ;	Funcionando el símbolo '|' como un OR.
+- A → b | c | d ;    Funcionando el símbolo '|' como un OR.
 - A → (b | c) d ;    Los paréntesis dan prioridad de elección al grupo que rodean.
 - A → B B* ;    El símbolo '*' indica que la variable a la que sigue se puede repetir entre 0 e infinitas veces. De esta forma logramos recursión.
 - A → B+ ;    El símbolo '*' indica que la variable a la que sigue se puede repetir entre 1 e infinitas veces. De esta forma logramos recursión.
@@ -514,23 +233,112 @@ En nuestra gramática para el lenguaje Lox se definen de comienzo las siguientes
 Esta sería nuestra gramática resultante:
 
 expression → literal
-					| unary
-					| binary
-					| grouping ;
+                    | unary
+                    | binary
+                    | grouping ;
 literal → NUMBER | STRING | "true" | "false" | "nil" ;
 grouping → "(" expression ")" ;
 unary → ( "-" | "!" ) expression ;
 binary → expression operator expression ;
 operator → "==" | "!=" | "<" | "<=" | ">" | ">="
-				| "+" | "-" | "*" | "/" ;
+                | "+" | "-" | "*" | "/" ;
 
+#### 5.2. Implementando Arboles Sintácticos
 
+Para esto lo primero que se necesita es crear una clase Expr en la que definiremos los distintos tipos de expresiones. Dado que es una tarea bastante robótica, se ha utilizado metaprogramación para generar el fichero expresiones.py que contendrá estas mismas.
 
-## El patrón Visitante
+Hablar de metaprogramación
+
+Para ello se desarrolla el programa metaExpr que pasada una lista con los distintos tipos de expresiones y sus atributos, genera un fichero en el que define todas las expresiones como es necesario.
+
+Hablar del "expression problem"
+
+#### 5.3. El patrón Visitante
 
 Este patrón funciona de manera que teniendo dos subclases 'B' y 'C' que extienden a otra clase principal 'A', se crea una interfaz 'visitaBC' con un nuevo método para cada una de las subclases llamado 'visitaB' y 'visitaC', en la clase 'A' se agrega un método llamado 'acepta', y por último en cada una de las subclases se define este método 'acepta' de forma que se le pase la interfaz 'visitaBC' como parámetro y ahí se elija si 'visitaB' o 'visitaC'. Ahora cuando se desee realizar una operación se llama al método 'acepta' y se le pasa como parámetro el visitante (la interfaz) que se quiera ejecutar.
 
 Esto se conoce como polimorfismo, definido como la capacidad de llamar a objetos de distintos tipos con la misma sintaxis.
 
+#### 5.4. AstPrinter
+
+Finalmente se crea un programa sencillo que imprime por pantalla estas expresiones de manera más organizada por pantalla, separando operaciones por parentesis.
 
 
+
+## 6. Parsing
+
+La palabra "parse" viene del francés "pars" y significa tomar un texto y un mapear cada palabra en la gramática de un lenguaje. El lenguaje en este caso es Lox no el antiguo francés.
+
+
+
+#### 6.1. Ambigüedad
+
+Cuando se *parsea* no solo se determina si el string es código válido para Lox, se está haciendo un seguimiento de qué reglas coinciden con qué partes de este, de manera que se sepa a que parte del lenguaje pertenece dicho token. Se pueden generar dos arboles binarios válidos y distintos pero que  devuelvan un resultado distinto:
+
+<img title="" src="file:///C:/Users/Eduardo/AppData/Roaming/marktext/images/2023-04-19-19-41-44-image.png" alt="" width="201" data-align="center">
+
+Para esto se establecen reglas de precedencia y asociatividad.
+
+- La **precedencia** determina qué operador es evaluado primero en una expresión que contiene una mezcla de distintos operadores.
+
+- La **asociatividad** determina que operador es evaluado primero en una serie del mismo operador.
+  
+  
+
+Se resolverá este problema en Lox utilizando las mismas reglas de precedencia que C, yendo de menor a mayor.
+
+| Name       | Operators | Associates |
+|:----------:|:---------:|:----------:|
+| Equality   | == !=     | Left       |
+| Comparison | > >= < <= | Left       |
+| Term       | - +       | Left       |
+| Factor     | / *       | Left       |
+| Unary      | ! -       | Right      |
+
+La gramática de expresiones resultaría de la siguiente manera:
+
+expression     → equality ;
+equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term           → factor ( ( "-" | "+" ) factor )* ;
+factor         → unary ( ( "/" | "*" ) unary )* ;
+unary          → ( "!" | "-" ) unary
+                   | primary ;
+primary        → NUMBER | STRING | "true" | "false" | "nil"
+                   | "(" expression ")" ;
+
+
+
+#### 6.2. Parsing Recursivo Descendente
+
+Para realizar el parser se ha utilizado la técnica de recursion descendente, que se considera top-down empezando por la regla gramatical superior hasta llegar a la última de ellas.
+
+
+
+Creamos la clase Parser la cual tiene como atributos una lista de Tokens que le pasaremos en el constructor como parámetro, y un contador **current** que indica el token en el que nos encontramos actualmente.
+
+A continuación creamos funciones para los distintas reglas de la gramática que se difinió anteriormente. En cada función se llama a la inferior pasandole unos tipos como parámetro. Una vez se llega al nivel más bajo se empieza a comparar el token con estos tipos, si coinciden se devuelve la expresion en la que se encuentra en ese instante, si no coincide sube al la regla superior y compara con los siguientes tipos. Así hasta que el token coincide con alguno de los tipos, en caso contrario devuelve un error.
+
+Esto lo hace con cada uno de los tokens contenidos en su lista tokens, avanzando al siguiente según va identificando las expresiones.
+
+
+
+#### 6.3. Errores de Sintáxis
+
+Un parser tiene dos tareas:
+
+- Dada una secuencia válida de tokens, procudir el árbol sintáctico correspondiente.
+
+- Dada una secuencia no válida de tokens, detectar cualquier error y comunicar al usuario de su fallo.
+
+En este caso utilizaremos la técnicas de recuperación **panic mode**. Una vez se detecta un error se entra en modo pánico, se para la ejecución y se espera una sincronización.
+
+De momento esta sincronización no se utiliza, así que los errores pararán el programa mostrando un mensaje por pantalla.
+
+
+
+#### 6.4. Conectando el Parser
+
+Finalmente se crea una función parse() que llama a la función expresión que analizará todos los tokens encapsulada en un catch que detecte ParseErrors. 
+
+Se añade en la función run() de la clase Lox() la llamada la creación del parser con el resultado que nos devuleve el lexer y se llama a este último método.

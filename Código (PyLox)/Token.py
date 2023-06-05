@@ -52,6 +52,10 @@ class TokenType(Enum):
     # end-of-file
     EOF = ''
 
+    def __repr__(self):
+        
+        return "TokenType."+self.__class__.__name__
+
 class Token:
     def __init__(self, linea:int, tipo:TokenType, valor:any):
         self.linea = linea
@@ -59,11 +63,14 @@ class Token:
         self.valor = valor
 
     def __repr__(self):
-        return f'''Token({self.linea},TokenType.{self.tipo},"{self.valor}")'''
+        return f'''Token({self.linea},{self.tipo},"{self.valor}")'''
+
+    def tipo(self) -> TokenType:
+        return self.tipo
 
 _keywords: Tuple[str] = (
     'true','false','nil','and','or','if','else','fun','return','for','class',
-    'super','this','while','print'
+    'super','this','while','print','var'
     )
 
 KEYWORDS: Dict[str,TokenType] = {key: TokenType(key) for key in _keywords}
@@ -78,3 +85,5 @@ MULTI_CHARS: Tuple[str] = ('!', '!=', '=', '==', '>', '>=', '<', '<=')
     tokk = Token(0,'num',3)
     print(tokk)'''
 
+if __name__ == '__main__':
+    t = TokenType.VAR

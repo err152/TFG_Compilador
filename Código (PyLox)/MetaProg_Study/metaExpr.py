@@ -11,13 +11,17 @@ def defineAst(self, outputDir:str, baseName:str, types:[]):
     with open(path,'w')as f:
         f.write("from Token import Token" + "\n")
         f.write("from typing import Any" + "\n")
-        f.write("from abc import ABC, abstractmethod" + "\n\n")
+        f.write("from abc import ABC, abstractmethod" + "\n")
+        f.write("from typing import List"+"\n")
+        if baseName == "Stmt":
+            f.write("from expressions import Expr"+"\n")
+        f.write("\n")
 
         defineVisitor(self,f,baseName,types)
         
         f.write("class " + baseName + "(ABC):" + "\n")
         f.write("   @abstractmethod"+"\n")
-        f.write("   def acepta(Visitor):"+"\n")
+        f.write("   def acepta("+baseName+"Visitor):"+"\n")
         f.write("       pass"+"\n\n")
 
         for tipe in types:
@@ -27,7 +31,7 @@ def defineAst(self, outputDir:str, baseName:str, types:[]):
  
 
 def defineVisitor(self, f, baseName:str, types:[]):
-    f.write("class Visitor(ABC):"+"\n")
+    f.write("class "+baseName+"Visitor(ABC):"+"\n")
 
     for tipe in types:
         typeName = tipe.split(":")[0].strip()
@@ -57,7 +61,7 @@ def defineType(self, f, baseName:str, className:str, fieldList:str):
         f.write("       self." + name + " = " + name + "\n")
 
     # define acepta method
-    f.write("\n   " + "def acepta(self, visitor: Visitor):" + "\n")
+    f.write("\n   " + "def acepta(self, visitor: "+baseName+"Visitor):" + "\n")
     f.write("       return visitor.visit_"+className.lower()+"_"+baseName.lower()+"(self)"+"\n")
     
     f.write("\n")
@@ -69,12 +73,20 @@ class GenerateAst:
         outputDir = args[0]
         
         defineAst(self,outputDir+'/expressions.py',"Expr",["Binary : Expr left, Token operator, Expr right",
+                                "Assign : Token name, Expr value",
+                                "Call : Expr callee, Token paren, List[Expr] arguments",
                                 "Grouping : Expr expression",
                                 "Literal : Any value",
+                                "Logical : Expr left, Token operator, Expr right",
                                 "Unary : Token operator, Expr right",
                                 "Variable : Token name"])
 
-        defineAst(self,outputDir+'/statements.py',"Stmt",["Expression : Expr expression",
-                                         "Print : Expr expression",
-                                         "Var : Token name, Expr initializer"])
+        defineAst(self,outputDir+'/statements.py',"Stmt",["Block : List[Stmt] statements",
+                                "Expression : Expr expression",
+                                "Function : Token name, List[Token] params, List[Stmt] body",
+                                "If : Expr condition, Stmt thenBranch, Stmt elseBranch",
+                                "Print : Expr expression",
+                                "Return : Token keyword, Expr value",
+                                "Var : Token name, Expr initializer",
+                                "While : Expr condition, Stmt body"])
     

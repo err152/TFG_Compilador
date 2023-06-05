@@ -1,7 +1,7 @@
 import expressions
 from Token import Token, TokenType
 
-class AstPrinter(expressions.Visitor):
+class AstPrinter(expressions.ExprVisitor):
    
    def print(self, expr:expressions.Expr) -> str:
       return expr.acepta(self)
@@ -29,10 +29,10 @@ class AstPrinter(expressions.Visitor):
 if __name__ == "__main__":
    exp = expressions.Binary(
       expressions.Unary(
-         Token("",TokenType.MINUS,1),
+         Token(1,TokenType.MINUS,"-"),
          expressions.Literal(123)
          ),
-      Token("",TokenType.STAR,1),
+      Token(1,TokenType.STAR,"*"),
       expressions.Grouping(expressions.Literal(45.67))
       )
 

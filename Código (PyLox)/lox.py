@@ -1,3 +1,6 @@
+##### Para ejecutar por fichero copiar
+## 'C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\b4sur4\\lox_prueba.lox'
+
 from pathlib import Path
 from sys import argv
 
@@ -6,9 +9,9 @@ from lexer import Lexer
 from Interprete import Interprete,LoxRuntimeError
 from Token import Token,TokenType
 import AstPrinter
+from Resolver import Resolver
 
 class Lox:
-    interpreter = Interprete()
     hadError = False
     hadRuntimeError = False
 
@@ -22,33 +25,26 @@ class Lox:
         else:
             Lox.report(token.linea," at '"+token.value+"'",msg)
 
-    def runtimeError(error:LoxRuntimeError):
-        print(f"{error.message}\n[line {error.token.linea}]")
-        Lox.hadRuntimeError = true
-
     def run(source:str):
         lex = Lexer(source)
         tokens = lex.extrae_tokens()
-        print(f"-- tokens : {tokens}")
-    
-        '''
-        for token in tokens:
-            print(token)
-        '''
 
         pars = Parser(tokens)
-        print(f"-- tokens in parser : {pars.tokens}")
-        expr = pars.parse()
-        #stmts = pars.parse()
-        print(f"-- expr : {expr}")
-
-        Lox.interpreter.interpret(expr)
-        #Lox.interpreter.interpret(stmts)
+        stmts = pars.parse()
+                
+        inter = Interprete()
+        
+        #res = Resolver(inter)
+        #res.resolve(statements=stmts)
+        #if self.hadError:
+        #    return
+        
+        inter.interpret(stmts)
     
-        print(AstPrinter.AstPrinter().print(expr))
 
     def runFile(path:str):
-        data = path.read_text(encoding='utf-8',errors='strict')
+        with open(path,'r') as archivo:
+            data = archivo.read()
         Lox.run(data)
 
         if Lox.hadError:
@@ -56,7 +52,7 @@ class Lox:
         if Lox.hadRuntimeError:
             exit(70)
 
-        Lox.hadError = false
+        Lox.hadError = False
 
     def runPrompt():
         while True:
@@ -69,8 +65,10 @@ class Lox:
 
         Lox.hadError = false
 
-
 def main(args):
+    
+    Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_func9.lox')
+    '''
     if len(args) > 1:
         print("Usage: jlox [script]")
         exit(65)
@@ -80,5 +78,7 @@ def main(args):
 
     else:
         Lox.runPrompt()
-        
+    '''
+    
 main(argv[1:])
+
