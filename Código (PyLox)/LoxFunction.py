@@ -21,7 +21,7 @@ class LoxFunction(LoxCallable):
     def call(self, inter : Interprete, argu : List[any], entorno : Entorno):
         #ento : Entorno = Entorno(self.closure)
         #(self.closure.all_variables_defined())
-        entorno.closure_function = deepcopy(self.closure)
+        entorno.closure_function = (self.closure)
         #self.closure = entorno
         entorno.enter_scope()
         for par, arg1 in zip(self.declaration.params, argu):

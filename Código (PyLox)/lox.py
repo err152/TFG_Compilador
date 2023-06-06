@@ -25,15 +25,13 @@ class Lox:
         else:
             Lox.report(token.linea," at '"+token.value+"'",msg)
 
-    def run(source:str):
+    def run(source:str, inter : Interprete = None):
         lex = Lexer(source)
         tokens = lex.extrae_tokens()
 
         pars = Parser(tokens)
         stmts = pars.parse()
-                
-        inter = Interprete()
-        
+                    
         #res = Resolver(inter)
         #res.resolve(statements=stmts)
         #if self.hadError:
@@ -55,18 +53,19 @@ class Lox:
         Lox.hadError = False
 
     def runPrompt():
+        inter = Interprete()
         while True:
             print("> ")
             line = input()
             if line == None:
                 return
             else:
-                Lox.run(line)
+                Lox.run(line,inter)
 
         Lox.hadError = false
 
 def main(args):
-    
+    '''
     Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_func9.lox')
     '''
     if len(args) > 1:
@@ -78,6 +77,6 @@ def main(args):
 
     else:
         Lox.runPrompt()
-    '''
+    
 main(argv[1:])
 
