@@ -79,6 +79,5 @@ def main(args):
     else:
         Lox.runPrompt()
     '''
-    
 main(argv[1:])
 

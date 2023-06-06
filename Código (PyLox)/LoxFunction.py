@@ -22,18 +22,18 @@ class LoxFunction(LoxCallable):
         #ento : Entorno = Entorno(self.closure)
         #(self.closure.all_variables_defined())
         entorno.closure_function = deepcopy(self.closure)
-        self.closure = entorno
-        self.closure.enter_scope()
+        #self.closure = entorno
+        entorno.enter_scope()
         for par, arg1 in zip(self.declaration.params, argu):
-            self.closure.define(par.valor,arg1)
+            entorno.define(par.valor,arg1)
 
         try:
             inter.executeBlock(self.declaration.body)
         except Return as returnValue:
             return returnValue.value
         finally:
-            self.closure.exit_scope()
-            self.closure = entorno.closure_function
+            entorno.exit_scope()
+            #self.closure = entorno.closure_function
         return None
         
     

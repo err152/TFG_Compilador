@@ -34,7 +34,8 @@ class Entorno:
       for i in reversed(self.stack):
          if name.valor in i:
             return i.get(name.valor)
-      return self.closure_function.get(name)
+      if self.closure_function is not None:
+         return self.closure_function.get(name)
       raise RuntimeError(name,"Undefined variable '"+name.valor+"'.")
 
    def assign(self, name:Token,value:any):
