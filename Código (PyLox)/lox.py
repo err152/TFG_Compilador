@@ -15,44 +15,45 @@ class Lox:
     hadError = False
     hadRuntimeError = False
 
-    def report(linea:int,where:str,msg:str):
+    def report(self, linea:int,where:str,msg:str):
         print(f"[linea {linea}] Error{where}: {msg}")
-        Lox.hadError = true
+        self.hadError = true
 
-    def error(token:Token,msg:str):
+    def error(self, token:Token,msg:str):
         if token.tipo == TokenType.EOF:
-            Lox.report(token.linea, " at end",msg)
+            self.report(token.linea, " at end",msg)
         else:
-            Lox.report(token.linea," at '"+token.value+"'",msg)
+            self.report(token.linea," at '"+token.value+"'",msg)
 
-    def run(source:str, inter : Interprete = None):
+    def run(self, source:str, inter : Interprete = None):
         lex = Lexer(source)
         tokens = lex.extrae_tokens()
 
         pars = Parser(tokens)
         stmts = pars.parse()
                     
-        #res = Resolver(inter)
-        #res.resolve(statements=stmts)
-        #if self.hadError:
-        #    return
+        res = Resolver(inter)
+        res.resolve(statements=stmts)
+        if self.hadError:
+            return
         
         inter.interpret(stmts)
     
 
-    def runFile(path:str):
+    def runFile(self, path:str):
+        inter = Interprete()
         with open(path,'r') as archivo:
             data = archivo.read()
-        Lox.run(data)
+        self.run(data,inter)
 
         if Lox.hadError:
             exit(65)
         if Lox.hadRuntimeError:
             exit(70)
 
-        Lox.hadError = False
+        self.hadError = False
 
-    def runPrompt():
+    def runPrompt(self):
         inter = Interprete()
         while True:
             print("> ")
@@ -65,8 +66,8 @@ class Lox:
         Lox.hadError = false
 
 def main(args):
-    '''
-    Lox.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_func9.lox')
+    a = Lox()
+    a.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_bind1.lox')
     '''
     if len(args) > 1:
         print("Usage: jlox [script]")
@@ -77,6 +78,6 @@ def main(args):
 
     else:
         Lox.runPrompt()
-    
+    '''
 main(argv[1:])
 

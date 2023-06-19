@@ -11,11 +11,10 @@ class FunctionType(Enum):
 
 class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
    
-   scopes = [[str,bool]]
-   currentFunc = FunctionType.NONE
-   
    def __init__(self,inter: Interprete):
       self.inter = inter
+      self.scopes = [{}]
+      self.currentFunction = FunctionType.NONE
    
    def resolve(self, *args, **kwargs):
       if 'statements' in kwargs:
@@ -30,17 +29,17 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
          expression.acepta(self)
          
    def resolveFunction(self, func:statements.Function, typee:FunctionType):
-      enclosingFunction : FunctionType = self.currentFunc
-      self.currentFunc = typee
+      enclosingFunction : FunctionType = self.currentFunction
+      self.currentFunction = typee
       
       self.beginScope()
       for param in func.params:
          self.declare(param)
          self.define(param)
-      self.resolve(func.body)
+      self.resolve(statements=func.body)
       self.endScope()
       
-      self.currentFunc = enclosingFunction
+      self.currentFunction = enclosingFunction
       
    def visit_if_stmt(self, stmt:statements.If):
       self.resolve(statement=stmt.condition)
@@ -55,7 +54,8 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
    
    def visit_return_stmt(self, stmt:statements.Return):
       if self.currentFunction == FunctionType.NONE:
-         Lox.error(stmt.keyword,"Can't return from top-level code.")
+         raise RuntimeError(stmt.keyword,"Can't return from top-level code.")
+         #lox.error(stmt.keyword,"Can't return from top-level code.")
       if stmt.value is not None:
          self.resolve(statement=stmt.value)
       return None
@@ -71,19 +71,21 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
          return
       scope = self.scopes[-1] # peek()
       if name.valor in scope:
-         Lox.error(name,"Already a variable with this name in this scope.")
-      scope.append([name.valor,False])
+         raise RuntimeError(name,"Already a variable with this name in this scope.")
+         #mport lox
+         #lox.error(name,"Already a variable with this name in this scope.")
+      scope[name.valor] = False
       
    def define(self,name:Token):
       if len(self.scopes) == 0:
          return
-      self.scopes[-1].append([name.valor,True])
+      self.scopes[-1][name.valor] = True
       
-   def resolveLocal(expr:expressions.Expr, name:Token):
+   def resolveLocal(self, expr:expressions.Expr, name:Token):
       i = len(self.scopes) - 1
       while i >= 0:
          if name.valor in self.scopes[i]:
-            self.inter.resolve(expression=expr,jumps=len(self.scopes)-1-i) # esto no está bien
+            self.inter.resolve(expr,len(self.scopes)-1-i) # esto no está bien
             return
          i = i-1
       
@@ -149,9 +151,15 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
       return None
    
    def visit_variable_expr(self, expr:expressions.Variable):
-      import Lox
-      if not len(self.scopes) == 0 and self.scopes[-1][expr.name.valor] == False: # no se si está bien 
-         Lox.error(expr.name,"Can't read local variable in tis own initializer.")
+      if not len(self.scopes) == 0:
+         try:
+            a = self.scopes[-1][expr.name.valor]
+            if a == False:
+               raise RuntimeError(expr.name,"Can't read local variable in its own initializer.")
+               # no se si está bien 
+         except KeyError:
+            pass
+            #lox.error(expr.name,"Can't read local variable in its own initializer.")
          
       self.resolveLocal(expr,expr.name)
       return None

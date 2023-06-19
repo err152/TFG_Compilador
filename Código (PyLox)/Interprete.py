@@ -18,7 +18,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def __init__(self):
       self.ent = Entorno()
-      self.locals = [expressions.Expr,int]
+      self.locals = {} #[expressions.Expr,int]
    
    def stringify(self, obj:any) -> str:
       from LoxFunction import LoxFunction
@@ -70,8 +70,9 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       stmt.acepta(self)
       
    def resolve(self,expr:expressions.Expr,depth:int):
-      self.locals.append(expr,depth)
-
+      #self.locals[expr.name.valor] = depth 
+      self.locals.setdefault(expr.name.valor,set()).add(depth)
+      
    def executeBlock(self,state:List[statements.Stmt]):
       self.ent.enter_scope()
       try:
@@ -133,7 +134,11 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       #if distance is not None:
       #   self.ento.assignAt(distance,expr.name,value)
       #else:
-      self.ent.assign(expr.name,value)
+      try:
+         distance : int = self.locals[expr.name.valor]
+         self.ent.assignAt(distance,expr.name,value)
+      except (KeyError, RuntimeError):
+         self.ent.assign(expr.name,value)
       return value
 
    def visit_literal_expr(self,expr: expressions.Literal):
@@ -170,15 +175,21 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       return None
 
    def visit_variable_expr(self,expr:expressions.Variable):
-      return self.ent.get(expr.name)
-      #return self.lookUpVariable(expr.name,expr)
+      #return self.ent.get(expr.name)
+      return self.lookUpVariable(expr.name,expr)
    
    def lookUpVariable(self,name:Token,expr:expressions.Expr):
-      distance : int = self.locals[expr]
+      try:
+         distance : int = self.locals[expr.name.valor]
+         return self.ent.getAt(distance,name.valor)
+      except (KeyError,RuntimeError):
+         return self.ent.get(name)
+      '''
       if distance is not None:
          return self.ent.getAt(distance,name.valor) # enviroment?
       else:
          return self.ent.get(name) # globals? esto no funcionará
+      '''
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)

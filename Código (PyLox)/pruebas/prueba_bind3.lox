@@ -1,0 +1,8 @@
+var a = "hello";
+{
+  print a;
+  {
+    var b = "hola";
+    print b;
+  }
+}

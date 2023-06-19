@@ -102,13 +102,19 @@ A continuación, en LoxFunction en la función call(), rodeamos la ejecución de
 
 Nuestra implementación de call() crea un nuevo entorno al que vincula los parámetros de las funciones. Pero, ¿quién es el *padre* de este entorno?
 
-Hasta ahora, siempre han sido globals, el entorno global superior al actual. De esta manera cuando no se encuentra un identificador en un entorno local se busca en el inmediatamente superior. (Checkear ejemplo Fibonacci)
+Hasta ahora, siempre han sido globals, el entorno global superior al actual. De esta manera cuando no se encuentra un identificador en un entorno local se busca en el inmediatamente superior.
 
 Pero en Lox las declaraciones de funciones son permitidas en cualquier lugar dónde se pueda vincular un nombre.
 
 Denominamos **cierre** (closure) a una combinación de una función y el entorno léxico dentro del cual se define esa función. Es un concepto poderoso que permite a las funciones "recordar" y acceder a variables de su ámbito externo incluso después de que ese ámbito haya terminado de ejecutarse.
 
-Se añade en LoxFunction un nuevo entorno de cierre "closure". En el intérprete cuando se crea una función, se captura el entorno actual. Finalmente, cuando se llama a la funión call(), se utiliza este entorno de cierre como padre en vez de ir directamente al entorno global.
+En este apartado, nuevamente, se realiza una implementación distinta a la del libro.
+
+Se añade en LoxFunction un nuevo entorno de cierre "closure" que funciona como copia del entorno en el momento de definición de la función. Esto se guarda en su constructor el cual llamamos dentro del Interprete en la función visit_function_stmt.
+
+Hasta aquí todo está como en el libro, pero ahora en la clase Entorno añadimos también un atributo "closure_function" el cual se utiliza para guardar el entorno capturado en el momento de la definición en el caso de las funciones que hemos mencionado anteriormente. Al hacer esto, modificando las funciones get y assign, se pueden buscar las variables tanto en values, como en el stack, como en este nuevo entorno. Hecho esto solo falta asignar este closure_function. Esto se hace en el momento de la llamada a la función, en el call(). Cuando se lleva a cabo la llamada se asigna el entorno que tenemos copiado en la LoxFunction al closure_function del entorno actual, para después operar la función como ya se había definido anteriormente.
+
+
 
 ## 11. Resolución y vinculación
 
@@ -202,8 +208,6 @@ Para las funciones, se declara y define la declaración y se llama a la funcion 
 
 Finalmente, se añaden los demás nodos en los que no se hace nada especial más allá de resolver sus diferentes componentes.
 
-
-
 #### 11.4. Interpretando Variables Resueltas
 
 Veamos de que sirve el Resolver. Cada vez que se visita una variable, comunica al interprete el número de scopes que hay entre el actual y donde está definida la variable. Creamos un método resolve() que guarde en una lista *locals* las expresiones y el numero de salto para acceder a ellas.
@@ -213,8 +217,6 @@ Se modifica visit_var_expr() para que llame a una nueva función lookUpVariable(
 De igual manera hacemos con visit_assign_expr(), en este caso llamando a assignAt() que también llamará a ancestor().
 
 Finalmente, se añade al programa principal la definición del resolver y llamamos a resolve() antes que al interpret().
-
-
 
 #### 11.5. Errores de Resolución
 
