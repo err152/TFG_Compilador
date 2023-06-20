@@ -82,6 +82,7 @@ class GenerateAst:
                                 "Variable : Token name"])
 
         defineAst(self,outputDir+'/statements.py',"Stmt",["Block : List[Stmt] statements",
+                                "Class : Token name, List['Function'] methods",
                                 "Expression : Expr expression",
                                 "Function : Token name, List[Token] params, List[Stmt] body",
                                 "If : Expr condition, Stmt thenBranch, Stmt elseBranch",

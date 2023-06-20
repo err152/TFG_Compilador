@@ -158,6 +158,8 @@ class Parser:
 
     def declaration(self) -> Stmt:
         try:
+            if self.match(TokenType.CLASS):
+                return self.classDeclaration()
             if self.match(TokenType.FUN):
                 return self.function("function")
             if self.match(TokenType.VAR):
@@ -166,6 +168,17 @@ class Parser:
         except self.ParseError as e:
             self.synchronize()
             return None
+        
+    def classDeclaration(self) -> Stmt:
+        name : Token = self.consume(TokenType.IDENTIFIER,"Expect class name.")
+        self.consume(TokenType.LEFT_BRACE,"Expect '{' before class body.")
+        
+        methods : List[statements.Function] = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
+            methods.add(self.function("method"))
+            
+        self.consume(TokenType.RIGHT_BRACE,"Expect '}' before class body.")
+        return statements.Class(name,methods)  
         
     def statement(self) -> Stmt:
         if self.match(TokenType.FOR):
@@ -344,28 +357,6 @@ class Parser:
             stmts.append(self.declaration())
 
         return stmts
-    
-## Implementación Domingo
-
-def arithmetic_func(funcion):
-    def func_temp(lista_tokens):
-        res = 0
-        for i in lista_tokens:
-            res = funcion(res,i)
-        return res
-    return func_temp
-
-def res(x,y):
-    return x-y
-
-def sum(x,y):
-    return x+y
-
-def mul(x,y):
-    return x*y
-
-def pot(x):
-    return x*x
 
 if __name__ == '__main__':
     #pars = Parser([Token(0,TokenType.STRING,"'Hola mundo'"),Token(0,TokenType.EOF,"")])
