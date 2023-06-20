@@ -114,8 +114,6 @@ Se añade en LoxFunction un nuevo entorno de cierre "closure" que funciona como 
 
 Hasta aquí todo está como en el libro, pero ahora en la clase Entorno añadimos también un atributo "closure_function" el cual se utiliza para guardar el entorno capturado en el momento de la definición en el caso de las funciones que hemos mencionado anteriormente. Al hacer esto, modificando las funciones get y assign, se pueden buscar las variables tanto en values, como en el stack, como en este nuevo entorno. Hecho esto solo falta asignar este closure_function. Esto se hace en el momento de la llamada a la función, en el call(). Cuando se lleva a cabo la llamada se asigna el entorno que tenemos copiado en la LoxFunction al closure_function del entorno actual, para después operar la función como ya se había definido anteriormente.
 
-
-
 ## 11. Resolución y vinculación
 
 Un brecha se ha producido en nuestro barco al implementar los cierres.
@@ -169,7 +167,7 @@ En este paseo se visitan todos los nodos, pero un análisis estático es diferen
 
 #### 11.3. Una clase Resolver
 
-Se crea una nueva clase Resolver. Ala hora de resolver variables solo interesan un par de nodos:
+Se crea una nueva clase Resolver. A la hora de resolver variables solo interesan un par de nodos:
 
 - La declaración de un bloque introduce un nuevo scope para las declaraciones que contiene.
 
@@ -181,14 +179,15 @@ Se crea una nueva clase Resolver. Ala hora de resolver variables solo interesan 
 
 El resto de nodos no hacen nada especial, aunque se tendrán que visitar de todas formas para recorrer el árbol.
 
-Empezando por los bloques se crea un método resolve() que pasada una lista de declaraciones llama a resolve() para cada una de ellas. A su vez si esta recibe una declaracion o una expresion llama a sus métodos acepta() para ser resueltas.
+Esta clase tiene como atributos: un intérprete, en el que se guardanlos resultados; una lista de diccionarios 'scopes' en la que se van simulando la creación de entornos y guardando el estado (inicializadas o no) de las variables que se necesiten resolver; y un entorno 'currentFunction'  mediante el que se resuelven las clausuras.
+
+Empezando por los bloques se crea un método resolve() que pasada una lista de declaraciones llama a resolve() para cada una de ellas. A su vez si esta recibe una sentencia o una expresion llama a sus métodos acepta() para ser resueltas.
 
 Se crea ahora un método visit_block_stmt() en el que se llama a beginScope(), función que guarda un diccionario vacío en una lista scopes que tiene la clase Revolver() como atributo. Seguido, llama a resolve para la lista de declaraciones, y luego llama a endScope(), función que extrae un diccionario de la lista scopes.
 
 Para la declaracion de variables se diferencia entre la declaración y la definición. Se añade un nuevo método visit_var_stmt() que llama a declare(), resuelve la variable y llama a define().
 
-¿Qué ocurre cuando el inicializador de una variable local hace referencia a una 
-variable con el mismo nombre que la variable que se está declarando? Se tienen diferentes formas de actuar:
+¿Qué ocurre cuando el inicializador de una variable local hace referencia a una variable con el mismo nombre que la variable que se está declarando? Se tienen diferentes formas de actuar:
 
 1. Inicializar y luego añadir la nueva variable en el scope.
 
@@ -196,7 +195,7 @@ variable con el mismo nombre que la variable que se está declarando? Se tienen 
 
 3. Que esto devuelva un error.
 
-Como las priemras tienden a producir errores de usuario, se implementará la tercera.
+Como las primeras tienden a producir errores de usuario, se implementará la tercera.
 
 Primero se define la declaración que agrega la variable al scope más interno, de manera que  oculta cualquier scope externo y así sabemos que la variable existe.  La marcamos como "no lista todavía" al vincular su nombre a `False` en el diccionario scope.
 
@@ -210,13 +209,15 @@ Finalmente, se añaden los demás nodos en los que no se hace nada especial más
 
 #### 11.4. Interpretando Variables Resueltas
 
-Veamos de que sirve el Resolver. Cada vez que se visita una variable, comunica al interprete el número de scopes que hay entre el actual y donde está definida la variable. Creamos un método resolve() que guarde en una lista *locals* las expresiones y el numero de salto para acceder a ellas.
+Veamos de que sirve el Resolver. Cada vez que se visita una variable, comunica al interprete el número de scopes que hay entre el actual y donde está definida la variable. Creamos un método resolve() que guarde en una nueva lista *locals* las expresiones y el numero de saltos para acceder a ellas.
 
-Se modifica visit_var_expr() para que llame a una nueva función lookUpVariable() que comprueba en *locals* la distancia de la expresion que se va a tratar. Si la distancia no es nula llama a getAt() de lo contrario toma el valor de *globals*. La función getAt() devuelve el valor de la variable que le retorna ancestor(), función que devuelve el entorno a x saltos, pasandose x como parámetro.
+Se modifica visit_var_expr() para que llame a una nueva función lookUpVariable() que comprueba en *locals* la distancia de la expresion que se va a tratar. Si la distancia no es nula llama a una nueva función del entorno llamada getAt(), de lo contrario toma el valor de *globals*.
 
-De igual manera hacemos con visit_assign_expr(), en este caso llamando a assignAt() que también llamará a ancestor().
+En este momento se vuelve a desviar el contenido respecto del libro. En este caso, la función getAt() recibe una lista de distancias y un nombre de variable, para cada distancia: si esta es 0 se busca la variable de dicho nombre en values y en el último entorno del stack; en caso de no ser 0 la distancia, se busca la variable dentro del entorno situado en esa posición; si ninguna de estas búsquedas encuentra la variable y el entorno de clausura no es nulo se llama recursivamente a getAt() sobre este entorno de clausura con la misma lista de distancias; por último, si de ninguna de las maneras se encuentra la variable, se produce una excepción RuntimeError que el método lookUpVariable gestiona llamando al get() básico que buscará la variable en globals de forma normal.
 
-Finalmente, se añade al programa principal la definición del resolver y llamamos a resolve() antes que al interpret().
+De igual manera se hace con visit_assign_expr(), en este caso llamando a assignAt() que actúa de la misma manera que getAt() pero dando valor a las variables una vez las encuentra.
+
+Finalmente, se añade al programa principal la definición del resolver, y se hace una llamada a resolve() sobre el interprete antes de ser este otro ejecutado, para que en el momento en que se llame a interpret() tenga ya la lista con distancias para acceder a las variables de manera mucho más rápida. 
 
 #### 11.5. Errores de Resolución
 

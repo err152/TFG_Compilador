@@ -1,14 +1,21 @@
-Cambiar token nil a None para que sea más claro. true a True tambien?
+IMPORTANTE:
+- Implementar Clases y documentarlas en la memoria.
+- Apartado 'más allá', 'conclusión', 'apéndices', 'testing' e 'introducción'
+- Revisar todos los demás apartados y pulirlos.
 
 TODO:
 - test unitarios de parser e interprete a ficheros como en la asignatura .out .try (realcionar con DRY en 
 memoria)
+- Citar imagenes
+- completar lox run por terminal para que no ejecute solamente lineas si no que puedas escribir poco a poco un programa.
+- agregar de alguna manera sarabander Structure and Interpretation of computer
+- añadir grafos para que se entienda mejor la implementación (dreampuf digraph¿?)
 - apuntar por que hemos utilizado esta metodologia (cascada¿?) y no otra
 - vanilla programming
 - Explicar mensajes de Git commit
-- Citar imagenes
 - Comentar proyecto enfocado a dar un curso.
-- añadir grafos para que se entienda mejor la implementación (dreampuf digraph¿?)
-- agregar de alguna manera sarabander Structure and Interpretation of computer
+
+
+
 
  
