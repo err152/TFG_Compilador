@@ -213,12 +213,58 @@ Veamos de que sirve el Resolver. Cada vez que se visita una variable, comunica a
 
 Se modifica visit_var_expr() para que llame a una nueva función lookUpVariable() que comprueba en *locals* la distancia de la expresion que se va a tratar. Si la distancia no es nula llama a una nueva función del entorno llamada getAt(), de lo contrario toma el valor de *globals*.
 
-En este momento se vuelve a desviar el contenido respecto del libro. En este caso, la función getAt() recibe una lista de distancias y un nombre de variable, para cada distancia: si esta es 0 se busca la variable de dicho nombre en values y en el último entorno del stack; en caso de no ser 0 la distancia, se busca la variable dentro del entorno situado en esa posición; si ninguna de estas búsquedas encuentra la variable y el entorno de clausura no es nulo se llama recursivamente a getAt() sobre este entorno de clausura con la misma lista de distancias; por último, si de ninguna de las maneras se encuentra la variable, se produce una excepción RuntimeError que el método lookUpVariable gestiona llamando al get() básico que buscará la variable en globals de forma normal.
+En este momento se vuelve a desviar el contenido respecto del libro. En este caso, la función getAt() recibe una lista de distancias y un nombre de variable. Primeramente llama a un método auxiliar el cual crea una lista de diccionarios en la que almacena los distintos entornos a los que se quiere acceder mediante las distancias. Luego, para cada diccionario busca la variable y si la encuentra la retorna. Si no la encuentra y el entorno de clausura no es nulo se llama recursivamente a getAt() sobre este entorno de clausura con la misma lista de distancias; por último, si de ninguna de las maneras se encuentra la variable, se produce una excepción RuntimeError que el método lookUpVariable gestiona llamando al get() básico que buscará la variable en globals de forma normal.
 
 De igual manera se hace con visit_assign_expr(), en este caso llamando a assignAt() que actúa de la misma manera que getAt() pero dando valor a las variables una vez las encuentra.
+
+Para estos 3 métodos nos hemos ceñido una vez más al principio DRY tratando de refactorizar el código todo lo posible para no repetir acciones.
 
 Finalmente, se añade al programa principal la definición del resolver, y se hace una llamada a resolve() sobre el interprete antes de ser este otro ejecutado, para que en el momento en que se llame a interpret() tenga ya la lista con distancias para acceder a las variables de manera mucho más rápida. 
 
 #### 11.5. Errores de Resolución
 
 Se añade control de erores al Resolver para los casos en los que en un scope local se crean dos variables con un mismo nombre, y para prevenir llamadas return fuera de ningún scope.
+
+## 12. Clases
+
+Se podría terminar el Interprete aquí pero hoy en día muchos lenguajes de programación populares soportan la programación orientada a objetos. Añadirlo será un extra para darle cierta familiaridad a los usuarios.
+
+#### 12.1. OOP y Clases
+
+Existen 3 caminos hacia la programación orientada a objetos: clases, prototipos y multimétodos. Las clases fueron las primeras en inventarse y son las más populares actualmente.
+
+El principal objetivo de una clase es agrupar datos con el código que actúa sobre ellos. Para eso los usuarios declaran una clase que:
+
+- Expone un constructor que crea e inicializa nuevas instancias de la clase.
+
+- Poporciona una manera de guardar y acceder a los campos de estas instancias.
+
+- Define un grupo de métodos compartidos por todas las instancias de la misma clase que operan sobre el estado de cada instancia.
+
+Ese sería un resumen muy general. Muchos lenguajes programados a objetos también implementan herencia para reutilizar el comportamiento entre clases, pero hasta aquí llegará este proyecto.
+
+#### 12.2. Declaración de Clases
+
+Se comienza modificando la sintáxis. Cambian las reglas de nuestra gramática.
+
+declaration    → classDecl
+               | funDecl
+               | varDecl
+               | statement ;
+
+classDecl      → "class" IDENTIFIER "{" function* "}" ;
+
+En Lox las clases se definen mediante la palabra clave "class" seguida del nombre de la clase. En su cuerpo se definen los métodos al igual que las funciones pero sin ser precedidas de la palabra clave "fun".
+
+> class Breakfast {
+>   cook() {
+>     print "Eggs a-fryin'!";
+>   }
+>   serve(who) {
+>     print "Enjoy your breakfast, " + who + ".";
+>   }
+> }
+
+Se añade la regla classDecl al generador AST metaExpr. Esta guarda el nombre de la clase y los métodos en su cuerpo
+
+Se añade en el parser en la función declaration() la detección del token CLASS. También se añade una nueva función classDeclaration(). Esta función consume un token que corresponde al nombre, gestiona los corchetes que definen el cuerpo y crea una lista en la que guarda los métodos de la clase.
