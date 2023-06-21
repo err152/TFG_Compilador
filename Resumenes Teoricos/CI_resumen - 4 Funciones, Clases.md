@@ -217,7 +217,7 @@ En este momento se vuelve a desviar el contenido respecto del libro. En este cas
 
 De igual manera se hace con visit_assign_expr(), en este caso llamando a assignAt() que actúa de la misma manera que getAt() pero dando valor a las variables una vez las encuentra.
 
-Para estos 3 métodos nos hemos ceñido una vez más al principio DRY tratando de refactorizar el código todo lo posible para no repetir acciones.
+Para estos 3 métodos nos hemos ceñido una vez más al principio DRY tratando de refactorizar el código todo lo posible para no repetir acciones. Se han utilizado operadores Walrus.
 
 Finalmente, se añade al programa principal la definición del resolver, y se hace una llamada a resolve() sobre el interprete antes de ser este otro ejecutado, para que en el momento en que se llame a interpret() tenga ya la lista con distancias para acceder a las variables de manera mucho más rápida. 
 
@@ -268,3 +268,54 @@ En Lox las clases se definen mediante la palabra clave "class" seguida del nombr
 Se añade la regla classDecl al generador AST metaExpr. Esta guarda el nombre de la clase y los métodos en su cuerpo
 
 Se añade en el parser en la función declaration() la detección del token CLASS. También se añade una nueva función classDeclaration(). Esta función consume un token que corresponde al nombre, gestiona los corchetes que definen el cuerpo y crea una lista en la que guarda los métodos de la clase.
+
+Se añade también un método visit_class_stmt tanto al resolver como al intérprete. En el resolver, declaramos y definimos la sentencia. En el intérprete,  definimos la sentencia en el entorno ent, creamos una clase LoxClass y asignamos esta clase a la sentencia.
+
+LoxClass es una nueva clase que creamos en el fichero LoxClass.py. En un principio esta clase tan solo contiene un constructor que inicializa el atributo nombre de la clase, y un método \_\_repr\_\_ para mostrar el nombre cuando la clase se tenga que mostrar.
+
+En este momento, se comprueba si se parsean bien las clases con un pequeño programa de prueba que define una clase con un método y fuera de la clase hace un print de la clase. Como resultado se obtiene el nombre de la clase, tal y como se espera.
+
+#### 12.3. Creando Instancias
+
+Lox no tiene métodos estáticos a los que llamar dentro de la propia clase, por lo que sin instancias las clases son inútiles. Para crear estas instancias se hace uso de las clases y las funciones de llamada, de forma que una instancia sea una llamada a las clases. 
+
+El primer paso es hacer que la clase LoxClass implemente LoxCallable y por ello definir las funciones call() y arity() heredadas. La función call() crea y retorna una instancia de la propia clase, mientras que arity() retorna directamente 0 ya que la llamada a la clase no recibe argumentos.
+
+Toca crear la clase LoxInstance en un nuevo fichero LoxInstance.py. De momento solo definimos un \_\_init\_\_ en el que inicializamos una clase como atributo, y un \_\_repr\_\_ que imprima el nombre de la clase seguido de " instance".
+
+Se comprueba que esto funciona creando otro fichero de prueba simpel que crea una clase vacía, inicializia una nueva variable con esta clase y hace un print de la variable.
+
+#### 12.4. Propiedades de las Instancias
+
+Cada instancia es una colección de valores nombrados. Los métodos tanto de dentro como de fuera de la clase pueden modificar los valores o propiedades de las clases. Si estas propiedades se acceden desde fuera se utiliza el carácter '.'. Este punto tiene la misma precedencia que el paréntesis de una llamada a una función por lo que se modifica la regla de llamada para incluirlo.
+
+call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+
+###### 12.4.1. Expresiones Get
+
+Se añade un nodo al árbol sintáctico y se modifíca el parser para que en la función call() si detecta '.' cree una expression Get con el identificador que continua el punto.
+
+De igual manera se añade el método visit_get_expr tanto en el Resolver como en el Intérprete. Las propiedades no son resueltas ya que se visitan de forma dinámica. Por otro lado, en el intérprete se evalua la expresión y si el resultado es del tipo LoxInstance se trata de acceder a la propiedad, si no lo fuera se devuelve un error.
+
+Es momento de añadir estados a las instancias. Se crea un diccionario en LoxInstance que inicializamos vacío en el constructor.
+
+Definimos el método get mediante el que se accede a las propiedades de la instancia.
+
+###### 12.4.2. Expresiones Set
+
+Los setters tienen la misma sintáxis que los getters pero se situan en el lado izquierdo de la asignación. Por tanto, se modifica la regla de la gramática correspondiente a la asignación de la siguiente manera.
+
+assignment     → ( call "." )? IDENTIFIER "=" assignment
+               | logic_or ;
+
+A diferencia de los getters, los setters no encadenan. Si tengo una sentencia "libro.novela.genero = romance" solo ".genero" actúa como setter.
+
+Añadimos un nuevo nodo al generador AST.
+
+Para el parser hacemos lo siguiente. Parseamos la parte izquierda de la asignación como una expresión normal y en el momento en el que llegamos al símbolo de igualdad tomamos esta expresión ya parseada y la tranformamos en el nodo del árbol sintáctico correcto para la asignación.
+
+En el Resolver se añade visit_set_expr que resuelve el valor y el objeto a asignar.
+
+En el Intérprete se evalua el objeto cuya propiedad se va a modificar y se comprueba si es del tipo LoxInstance. Si no lo es se genera un error. Si lo es se evalua el valor que se va a asignar y se guarda en la instancia mediante un método set que añadimos a la clase LoxInstance para añadir propiedades y sus respectivos valores al diccionario fields.
+
+#### 12.5. Métodos en las Clases

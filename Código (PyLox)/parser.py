@@ -13,10 +13,12 @@ class Parser:
     def __init__(self,tokens:List[Token]):
         self.tokens = tokens
         
+        
     class ParseError(RuntimeError):
         def __init__(self,token:Token,msg:str):
             super().__init__(msg)
             self.token=token
+
 
     def match(self,*types:TokenType) -> bool:
         for tipo in types:
@@ -30,28 +32,35 @@ class Parser:
                 return True
         return False
 
+
     def check(self,tipo:TokenType) -> bool:
         if self.isAtEnd():
             return False
         s = getattr(self.peek(),"tipo") == tipo
         return self.peek().tipo == tipo
 
+
     def isAtEnd(self) -> bool:
         return self.peek().tipo == TokenType.EOF
+    
     
     def peek(self) -> Token:
         return self.tokens[self.current]
     
+    
     def previous(self) -> Token:
         return self.tokens[self.current-1]
+
 
     def advance(self) -> Token:
         if self.isAtEnd() == False:
             self.current += 1
         return self.previous()
 
+
     def error(self,token:Token,msg:str) -> ParseError:
         return self.ParseError(token,msg)
+
 
     def synchronize(self):
         self.advance()
@@ -68,11 +77,13 @@ class Parser:
 
             self.advance()
 
+
     def consume(self,tipo:TokenType,msg:str) -> Token:
         if self.check(tipo):
             return self.advance()
     
         raise self.error(self.peek(),msg)
+
 
     def primary(self) -> Expr:
         if self.match(TokenType.FALSE):
@@ -94,6 +105,7 @@ class Parser:
 
         self.error(self.peek(),"Expect expression.")
     
+    
     def unary(self) -> Expr:
         if self.match(TokenType.BANG,TokenType.MINUS):
             operator = self.previous()
@@ -101,6 +113,7 @@ class Parser:
             return expressions.Unary(operator,right)
     
         return self.call()
+
 
     def finishCall(self,callee: Expr) -> Expr:
         arguments : List[Expr] = []
@@ -120,10 +133,14 @@ class Parser:
         while True:
             if self.match(TokenType.LEFT_PAREN):
                 expr = self.finishCall(expr)
+            elif self.match(TokenType.DOT):
+                name : Token = self.consume(TokenType.IDENTIFIER, "Expect property name after '.'.")
+                expr = expressions.Get(expr,name)
             else:
                 break
         
         return expr
+
 
     def binary_op(self,func,tipos) -> Expr:
         expr = func()
@@ -135,29 +152,35 @@ class Parser:
 
         return expr
 
+
     def factor(self) -> Expr:
         tipos = [TokenType.SLASH,TokenType.STAR]
         return self.binary_op(self.unary,tipos)
+
 
     def term(self) -> Expr:
         tipos = [TokenType.MINUS,TokenType.PLUS]
         return self.binary_op(self.factor,tipos)
 
+
     def comparison(self) -> Expr:
         tipos = [TokenType.GREATER,TokenType.GREATER_EQUAL,TokenType.LESS,TokenType.LESS_EQUAL]
         return self.binary_op(self.term,tipos)
+
 
     def equality(self) -> Expr:
         tipos = [TokenType.BANG_EQUAL,TokenType.EQUAL_EQUAL]
         return self.binary_op(self.comparison,tipos)
 
+
     def expression(self) -> Expr:
         return self.assignment()
 
-    # Global Vars
 
     def declaration(self) -> Stmt:
         try:
+            if self.match(TokenType.CLASS):
+                return self.classDeclaration()
             if self.match(TokenType.FUN):
                 return self.function("function")
             if self.match(TokenType.VAR):
@@ -166,6 +189,19 @@ class Parser:
         except self.ParseError as e:
             self.synchronize()
             return None
+        
+        
+    def classDeclaration(self) -> Stmt:
+        name : Token = self.consume(TokenType.IDENTIFIER,"Expect class name.")
+        self.consume(TokenType.LEFT_BRACE,"Expect '{' before class body.")
+    
+        methods : List[statements.Function]= []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
+            methods.append(self.function("method"))
+            
+        self.consume(TokenType.RIGHT_BRACE,"Expect '}' before class body.")
+        return statements.Class(name,methods)
+    
         
     def statement(self) -> Stmt:
         if self.match(TokenType.FOR):
@@ -182,6 +218,7 @@ class Parser:
             return statements.Block(self.block())
         
         return self.expressionStatement()
+
 
     def forStatement(self) -> Stmt:
         self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'for'.")
@@ -217,6 +254,7 @@ class Parser:
 
         return body
 
+
     def ifStatement(self) -> Stmt:
         self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'if'.")
         condition : Expr = self.expression()
@@ -229,10 +267,12 @@ class Parser:
 
         return statements.If(condition,thenBranch,elseBranch)
 
+
     def printStatement(self) -> Stmt:
         value = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Print(value)
+    
     
     def returnStatement(self):
         key : Token = self.previous()
@@ -243,6 +283,7 @@ class Parser:
         self.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
         return statements.Return(key, value)
 
+
     def varDeclaration(self) -> Stmt:
         name : Token = self.consume(TokenType.IDENTIFIER,"Expect variable name.")
         initializer : Expr = None
@@ -250,6 +291,7 @@ class Parser:
             initializer = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after variable declaration.")
         return statements.Var(name,initializer)
+
 
     def whileStatement(self) -> Stmt : 
         self.consume(TokenType.LEFT_PAREN,"Expect '(' after 'while'.")
@@ -259,10 +301,12 @@ class Parser:
 
         return statements.While(condition, body)
 
+
     def expressionStatement(self) -> Stmt:
         expr = self.expression()
         self.consume(TokenType.SEMICOLON,"Expect ';' after value.")
         return statements.Expression(expr)
+    
     
     def function(self, kind : str) -> statements.Function:
         name : Token = self.consume(TokenType.IDENTIFIER,"Expect "+kind+" name.")
@@ -284,6 +328,7 @@ class Parser:
         body : List[Stmt] = self.block()
         return statements.Function(name,params,body)
 
+
     def block(self) -> List[Stmt]:
         statements : List[Stmt] = []
 
@@ -293,6 +338,7 @@ class Parser:
         self.consume(TokenType.RIGHT_BRACE,"Expect '}' after block.")
         return statements
     
+    
     def block_bucle(self) -> List[Stmt]:
         statements : List[Stmt] = []
 
@@ -301,6 +347,7 @@ class Parser:
 
         self.consume(TokenType.RIGHT_BRACE,"Expect '}' after block.")
         return statements
+
 
     def assignment(self) -> Expr:
         expr : Expr = self.orr()
@@ -312,10 +359,14 @@ class Parser:
             if isinstance(expr,expressions.Variable):
                 name : Token = expr.name
                 return expressions.Assign(name,value)
+            elif isinstance(expr,expressions.Get):
+                get : expressions.Get = expr
+                return expressions.Set(get.object, get.name, value)
 
             self.error(equals,"Invalid assignment target.")
 
         return expr
+
 
     def orr(self) -> Expr:
         expr : Expr = self.andd()
@@ -327,6 +378,7 @@ class Parser:
         
         return expr
 
+
     def andd(self) -> Expr:
         expr : Expr = self.equality()
 
@@ -337,6 +389,7 @@ class Parser:
 
         return expr
     
+    
     def parse(self) -> List[Stmt]:
         stmts : List[statements.Stmt] = []
         while not self.isAtEnd():
@@ -345,27 +398,6 @@ class Parser:
 
         return stmts
     
-## Implementación Domingo
-
-def arithmetic_func(funcion):
-    def func_temp(lista_tokens):
-        res = 0
-        for i in lista_tokens:
-            res = funcion(res,i)
-        return res
-    return func_temp
-
-def res(x,y):
-    return x-y
-
-def sum(x,y):
-    return x+y
-
-def mul(x,y):
-    return x*y
-
-def pot(x):
-    return x*x
 
 if __name__ == '__main__':
     #pars = Parser([Token(0,TokenType.STRING,"'Hola mundo'"),Token(0,TokenType.EOF,"")])

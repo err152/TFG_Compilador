@@ -95,6 +95,11 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
       self.endScope()
       return None
    
+   def visit_class_stmt(self,stmt: statements.Class):
+      self.declare(stmt.name)
+      self.define(stmt.name)
+      return None
+   
    def visit_expression_stmt(self, stmt:statements.Expr):
       self.resolve(statement=stmt.expression)
       return None
@@ -134,6 +139,10 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
          self.resolve(expression=argu)
       return None
    
+   def visit_get_expr(self, expr:expressions.Get):
+      self.resolve(expr.object)
+      return None
+   
    def visit_grouping_expr(self, expr:expressions.Grouping):
       self.resolve(expression=expr.expression)
       return None
@@ -144,6 +153,11 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
    def visit_logical_expr(self, expr:expressions.Logical):
       self.resolve(expression=expr.left)
       self.resolve(expression=expr.right)
+      return None
+   
+   def visit_set_expr(Self, expr:expressions.Set):
+      self.resolve(expr.value)
+      self.resolve(expr.object)
       return None
    
    def visit_unary_expr(self, expr:expressions.Unary):
