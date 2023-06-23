@@ -8,6 +8,12 @@ from typing import List
 class FunctionType(Enum):
       NONE = 'NONE'
       FUNCTION = 'FUNCTION'
+      INITIALIZER = 'INITIALIZER'
+      METHOD = 'METHOD'
+      
+class ClassType(Enum):
+      NONE = 'NONE'
+      CLASS = 'CLASS'
 
 class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
    
@@ -15,6 +21,7 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
       self.inter = inter
       self.scopes = [{}]
       self.currentFunction = FunctionType.NONE
+      self.currentClass = ClassType.NONE
    
    def resolve(self, *args, **kwargs):
       if 'statements' in kwargs:
@@ -57,6 +64,8 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
          raise RuntimeError(stmt.keyword,"Can't return from top-level code.")
          #lox.error(stmt.keyword,"Can't return from top-level code.")
       if stmt.value is not None:
+         if self.currentFunction == FunctionType.INITIALIZER:
+            raise RuntimeError(stmt.keyword,"Can't return a value from an initializer.")
          self.resolve(statement=stmt.value)
       return None
          
@@ -85,7 +94,7 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
       i = len(self.scopes) - 1
       while i >= 0:
          if name.valor in self.scopes[i]:
-            self.inter.resolve(expr,len(self.scopes)-1-i) # esto no está bien
+            self.inter.resolve(expr,len(self.scopes)-1-i)
             return
          i = i-1
       
@@ -96,8 +105,25 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
       return None
    
    def visit_class_stmt(self,stmt: statements.Class):
+      enclosingClass : ClassType = self.currentClass
+      self.currentClass = ClassType.CLASS
+      
       self.declare(stmt.name)
       self.define(stmt.name)
+      
+      self.beginScope()
+      self.scopes[-1]["this"] = True
+      
+      for method in stmt.methods:
+         declaration : FunctionType = FunctionType.METHOD
+         if method.name.valor == "init":
+            declaration = FunctionType.INITIALIZER
+         self.resolveFunction(method, declaration)
+         
+      self.endScope()
+      
+      self.currentClass = enclosingClass
+         
       return None
    
    def visit_expression_stmt(self, stmt:statements.Expr):
@@ -158,6 +184,12 @@ class Resolver(expressions.ExprVisitor,statements.StmtVisitor):
    def visit_set_expr(Self, expr:expressions.Set):
       self.resolve(expr.value)
       self.resolve(expr.object)
+      return None
+   
+   def visit_this_expr(self, expr:expressions.This):
+      if self.currentClass == ClassType.NONE:
+         raise RuntimeError(expr.keyword, "Can't use 'this' outside of a class.")
+      self.resolveLocal(expr,expr.keyword)
       return None
    
    def visit_unary_expr(self, expr:expressions.Unary):

@@ -12,6 +12,9 @@ class LoxInstance():
       if name.valor in self.fields:
          return self.fields[name.valor]
       
+      method : LoxFunction = self.klass.findMethod(name.valor)
+      if method is not None: return method.bind(self)
+      
       raise RuntimeError(name, "Undefined property '"+name.valor+"'.")
    
    def set(self, name:Token, value:any):

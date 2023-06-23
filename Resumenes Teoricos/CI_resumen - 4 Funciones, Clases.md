@@ -319,3 +319,67 @@ En el Resolver se añade visit_set_expr que resuelve el valor y el objeto a asig
 En el Intérprete se evalua el objeto cuya propiedad se va a modificar y se comprueba si es del tipo LoxInstance. Si no lo es se genera un error. Si lo es se evalua el valor que se va a asignar y se guarda en la instancia mediante un método set que añadimos a la clase LoxInstance para añadir propiedades y sus respectivos valores al diccionario fields.
 
 #### 12.5. Métodos en las Clases
+
+En este punto se pueden crear instancias de clases y almacenar datos en ellas, pero las clases en sí no hacen nada. Las instancias no son más que simples diccionarios. El siguiente paso es añadir métodos de comportamiento.
+
+En nuestra función visit_class_stmt del Resolver, añadimos un bucle que recorra los métodos de la clase, resolviendolos pasándole como argumento un nuevo valor del enumerado FunctionType 'METHOD'.
+
+Ahora se pasa a modificar el Intérprete. En la misma función visit_class_stmt recorremos de igual modo los métodos de la clase, esta vez creando un objeto LoxFunction para cada uno de los métodos y añadiéndolos a un diccionario methods que se pasará como parámetro en el momento de creación de la clase.
+
+Para que esto funcione se modifica LoxClass para recibir en el constructor este diccionario de funciones.
+
+Las clases guardan los métodos mientras que sus instancias guardan los atributos o propiedades. Pero aún así, se accede a estos métodos a partir de las instancias, por lo que se añade al método get de LoxInstance una búsqueda del método en cuestión en la clase que contiene como atributo mediante un nuevo método llamado findMethod. Este métod se crea en la clase LoxClass y no hace más que buscar en el diccionario methods un método específico.
+
+Se prueba que todo esto funciona nuevamente con otro pequeño programa de prueba prueba_clases3.lox.
+
+#### 12.6. This
+
+Lo siguiente es añadir una manera de acceder a las propiedades de la clase desde los métodos de esta, es decir el "this" de Java o el "self" de python.
+
+Se añade un nuevo nodo a la sintáxis y se modifica el método primary() del parser para reconocer la palabra clave this.
+
+En el resolver se crea un método visit_this_expr() que llama a resolveLocal(), pero this no es una variable que esté en el scope por lo que se modifica visit_class_stmt() para que despues de definir la variable, abra un nuevo scope y añada this a este, y antes de terminar cierre este nuevo scope.
+
+Se modifica en get() de LoxInstance la linea que retornaba el método si este estaba vacío para que devuelva la llamada a bind(self) del método. La función bind() de LoxFunction crea un nuevo entorno en el que define "this" y retorna una función pasándole la declaración de la función y este nuevo entorno a su constructor.
+
+Por último se crea el método visit_this_expr en el Intérprete para que busca la variable.
+
+###### 12.6.1. Usos no válidos de This
+
+¿Qué ocurre si se intenta acceder a this fuera de un método? esto no debería poderse hacer, se tiene que resolver este problema.
+
+Para ello se crea un nuevo enumerado en el Resolver llamado ClassType que diferencia entre clases y no clases, y añadimos un atributo al resolver de este tipo inicializado a NONE. Este atributo lo cambiaremos a CLASS cuando se entra a visit_class_expr y se retornará a su estado previo antes de salir de este mismo método.
+
+En visit_this_expr ahora se comprobará el tipo de clase actual y en caso de no ser de tipo clase se generará un error.
+
+#### 12.7. Constructores e Inicializadores.
+
+La construcción de un objeto se puede separar en dos partes:
+
+- Se reserva espacio en memoria para la nueva instancia.
+
+- Se hace una llamada a un código que inicializa el objeto por formar.
+
+
+
+Toca crear el constructor de nuestras clases. Cuando una clase es llamada, justo despues de crear la nueva instancia se busca un método "init", utilizando el formato que sigue python para los constructores, y si se encuentra inmediatamente se vincula y se invoca pasandole la lista de argumentos.
+
+Ahora que la clase llama al constructor y esta puede recibir argumentos, se tiene que modificar el método de aridad de la clase que se tenía puesto a un valor fijo de 0.
+
+
+
+###### 12.7.1. Invocando init() directamente
+
+En caso de llamarse directamente al método init() de una clase ya inicializada se ha decidido retornar el valor this. Para esto se modifica LoxFunction para que en el método call compruebe antes de retornar un valor si la función es una función de inicialización, si lo es retorna this, si no lo es retorna el valor a devolver.
+
+La manera de comprobar si es una función de inicialización es crear un nuevo atributo booleano isInitializer que lo indique, y modificar el constructor de LoxFunction para recibir este booleano como argumento para su constructor.
+
+
+
+###### 12.7.2. Retornando de init()
+
+¿Qué pasaría si se tratase de retornar un valor en el constructor? Esto es algo que normalmente se trata de evitar ya que el constructor debe devolver el objeto creado.
+
+La solución a este problema es crear un nuevo FunctionType en el Resolver 'INITIALIZER', en visit_class_stmt cuando se comprueban los métodos si el nombre del método es "init" se declara la función bajo este nuevo tipo, y lanzar un error en visit_return_stmt si el tipo de la función a retornar es initializer. 
+
+Hecho esto todavía no se cubre el caso de hacer un return aislado en la inicialización. Esto se gestiona desde la función call de LoxFunction cuando se trata la excepción Return, si la función actual es inicializadora se busca this en el entorno de clausura. 

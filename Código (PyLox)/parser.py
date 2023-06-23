@@ -96,6 +96,8 @@ class Parser:
             return expressions.Literal(float(self.previous().valor))
         if self.match(TokenType.STRING):
             return expressions.Literal(self.previous().valor)
+        if self.match(TokenType.THIS):
+            return expressions.This(self.previous())
         if self.match(TokenType.IDENTIFIER):
             return expressions.Variable(self.previous())
         if self.match(TokenType.LEFT_PAREN):

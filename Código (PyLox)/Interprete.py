@@ -80,7 +80,10 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    
    def resolve(self,expr:expressions.Expr,depth:int):
-      self.locals.setdefault(expr.name.valor,set()).add(depth)
+      if isinstance(expr,expressions.This):
+         self.locals.setdefault(expr.keyword,set()).add(depth)
+      else:
+         self.locals.setdefault(expr.name.valor,set()).add(depth)
     
       
    def executeBlock(self,state:List[statements.Stmt]):
@@ -100,8 +103,14 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    def visit_class_stmt(self,stmt: statements.Class):
       from LoxClass import LoxClass
+      from LoxFunction import LoxFunction
       self.ent.define(stmt.name.valor,None)
-      klass : LoxClass = LoxClass(stmt.name.valor)
+      methods = {}
+      for method in stmt.methods:
+         function : LoxFunction = LoxFunction(method,self.ent,method.name.valor == "init")
+         methods[method.name.valor] = function
+      
+      klass : LoxClass = LoxClass(stmt.name.valor, methods)
       self.ent.assign(stmt.name,klass)
       return None
 
@@ -113,7 +122,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    def visit_function_stmt(self,stmt:statements.Function):
       from LoxFunction import LoxFunction
-      funct : LoxFunction = LoxFunction(stmt,self.ent)
+      funct : LoxFunction = LoxFunction(stmt,self.ent,False)
       self.ent.define(stmt.name.valor, funct)
       return None
 
@@ -193,6 +202,9 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       value = self.evaluate(expr.value)
       obj.set(expr.name,value)
       return value
+   
+   def visit_this_expr(self, expr:expressions.This):
+      return self.lookUpVariable(expr.keyword, expr)
 
 
    def visit_grouping_expr(self,expr: expressions.Grouping):
@@ -219,7 +231,10 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    
    def lookUpVariable(self,name:Token,expr:expressions.Expr):
       try:
-         distance : int = self.locals[expr.name.valor]
+         if isinstance(expr,expressions.This):
+            distance : int = self.locals[expr.keyword]
+         else:
+            distance : int = self.locals[expr.name.valor]
          return self.ent.getAt(distance,name.valor)
       except (KeyError,RuntimeError):
          return self.ent.get(name)
@@ -287,10 +302,11 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          raise RuntimeError(expr.paren,"Expected "+function.arity()+
          " arguments but got "+len(arguments)+".")
 
-      if isinstance(function,LoxClass): return function.call(self,arguments)
+      #if isinstance(function,LoxClass): return function.call(self,arguments)
       return function.call(self,arguments,self.ent)
    
    def visit_get_expr(self, expr:expressions.Get):
+      from LoxInstance import LoxInstance
       obj = self.evaluate(expr.object)
       if isinstance(obj,LoxInstance):
          return obj.get(expr.name)
