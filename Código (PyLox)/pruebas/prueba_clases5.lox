@@ -1,5 +1,5 @@
 class Foo {
   init() {
-    return "something else";
+    return ; // "something else";
   }
 }
