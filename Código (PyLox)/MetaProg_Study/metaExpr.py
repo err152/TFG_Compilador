@@ -75,14 +75,21 @@ class GenerateAst:
         defineAst(self,outputDir+'/expressions.py',"Expr",["Binary : Expr left, Token operator, Expr right",
                                 "Assign : Token name, Expr value",
                                 "Call : Expr callee, Token paren, List[Expr] arguments",
+                                "Get : Expr object, Token name",
                                 "Grouping : Expr expression",
                                 "Literal : Any value",
                                 "Logical : Expr left, Token operator, Expr right",
+                                "Set : Expr object, Token name, Expr value",
+                                "This : Token keyword",
                                 "Unary : Token operator, Expr right",
                                 "Variable : Token name"])
 
         defineAst(self,outputDir+'/statements.py',"Stmt",["Block : List[Stmt] statements",
+<<<<<<< HEAD
                                 "Class : Token name, List['Function'] methods",
+=======
+                                "Class : Token name, List[Stmt] methods",
+>>>>>>> clases
                                 "Expression : Expr expression",
                                 "Function : Token name, List[Token] params, List[Stmt] body",
                                 "If : Expr condition, Stmt thenBranch, Stmt elseBranch",

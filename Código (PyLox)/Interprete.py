@@ -2,7 +2,6 @@ from Token import Token,TokenType
 from Entorno import Entorno
 from typing import List
 from Return import Return
-#import LoxCallable
 import expressions
 import statements
 
@@ -14,11 +13,13 @@ class LoxRuntimeError(RuntimeError):
       super().__init__(msg)
       self.token = token
 
+
 class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
 
    def __init__(self):
       self.ent = Entorno()
-      self.locals = {} #[expressions.Expr,int]
+      self.locals = {}
+   
    
    def stringify(self, obj:any) -> str:
       from LoxFunction import LoxFunction
@@ -31,6 +32,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          return text
       return str(obj)
    
+   
    def interpret(self,statements:List[statements.Stmt]):
       try:
          for statement in statements:
@@ -38,18 +40,22 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       except RuntimeError as error:
          raise RuntimeError(error)
 
+
    def check_number_operand(self, operator: Token, operand: any):
       if self.is_number(operand):
          return
       raise LoxRuntimeError(operator,"Operand must be a number.")
+
 
    def check_number_operands(self, operator: Token, left: any, right: any):
       if self.is_number(left) and self.is_number(right):
          return
       raise LoxRuntimeError(operator,"Operands must be numbers.")
       
+      
    def is_equal(self, a: any, b: any) -> bool:
       return a == b
+
 
    def is_number(self, obj: any) -> bool:
       try:
@@ -58,20 +64,27 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       except (ValueError,TypeError):
          return False
 
+
    def is_truthy(self, obj: any) -> bool:
       if obj == "0":
          return False
       return bool(obj)
 
+
    def evaluate(self,expr: expressions.Expr):
       return expr.acepta(self)
    
+   
    def execute(self,stmt: statements.Stmt):
       stmt.acepta(self)
-      
+   
+   
    def resolve(self,expr:expressions.Expr,depth:int):
-      #self.locals[expr.name.valor] = depth 
-      self.locals.setdefault(expr.name.valor,set()).add(depth)
+      if isinstance(expr,expressions.This):
+         self.locals.setdefault(expr.keyword,set()).add(depth)
+      else:
+         self.locals.setdefault(expr.name.valor,set()).add(depth)
+    
       
    def executeBlock(self,state:List[statements.Stmt]):
       self.ent.enter_scope()
@@ -82,19 +95,37 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          
          self.ent.exit_scope()
 
+
    def visit_block_stmt(self,stmt: statements.Block):
       self.executeBlock(stmt.statements)
       return None
+   
+   
+   def visit_class_stmt(self,stmt: statements.Class):
+      from LoxClass import LoxClass
+      from LoxFunction import LoxFunction
+      self.ent.define(stmt.name.valor,None)
+      methods = {}
+      for method in stmt.methods:
+         function : LoxFunction = LoxFunction(method,self.ent,method.name.valor == "init")
+         methods[method.name.valor] = function
+      
+      klass : LoxClass = LoxClass(stmt.name.valor, methods)
+      self.ent.assign(stmt.name,klass)
+      return None
+
 
    def visit_expression_stmt(self,stmt: statements.Expression):
       value = self.evaluate(stmt.expression)
       return None
    
+   
    def visit_function_stmt(self,stmt:statements.Function):
       from LoxFunction import LoxFunction
-      funct : LoxFunction = LoxFunction(stmt,self.ent)
+      funct : LoxFunction = LoxFunction(stmt,self.ent,False)
       self.ent.define(stmt.name.valor, funct)
       return None
+
 
    def visit_if_stmt(self, stmt: statements.If):
       if self.is_truthy(self.evaluate(stmt.condition)):
@@ -103,10 +134,12 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          self.execute(stmt.elseBranch)
       return None
 
+
    def visit_print_stmt(self,stmt: statements.Print):
       value = self.evaluate(stmt.expression)
       print(self.stringify(value))
       return None
+   
    
    def visit_return_stmt(self, stmt:statements.Return):
       value = None
@@ -114,6 +147,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          value = self.evaluate(stmt.value)
          
       raise Return(value)
+
 
    def visit_var_stmt(self,stmt: statements.Var):
       value : any = None
@@ -123,17 +157,16 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       self.ent.define(stmt.name.valor,value)
       return None
 
+
    def visit_while_stmt(self,stmt: statements.While):
       while self.is_truthy(self.evaluate(stmt.condition)):
          self.execute(stmt.body)
 
       return None
 
+
    def visit_assign_expr(self,expr:expressions.Assign): ## 
       value : any = self.evaluate(expr.value)
-      #if distance is not None:
-      #   self.ento.assignAt(distance,expr.name,value)
-      #else:
       try:
          distance : int = self.locals[expr.name.valor]
          self.ent.assignAt(distance,expr.name,value)
@@ -141,8 +174,10 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          self.ent.assign(expr.name,value)
       return value
 
+
    def visit_literal_expr(self,expr: expressions.Literal):
       return expr.value
+
 
    def visit_logical_expr(self,expr: expressions.Logical):
       left = self.evaluate(expr.left)
@@ -157,9 +192,24 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          return False
       else:
          return x
+      
+   def visit_set_expr(self, expr:expressions.Set):
+      obj = self.evaluate(expr.object)
+      
+      if not isinstance(obj,LoxInstance):
+         raise RuntimeError(expr.name, "Only instances have fields.")
+      
+      value = self.evaluate(expr.value)
+      obj.set(expr.name,value)
+      return value
+   
+   def visit_this_expr(self, expr:expressions.This):
+      return self.lookUpVariable(expr.keyword, expr)
+
 
    def visit_grouping_expr(self,expr: expressions.Grouping):
       return self.evaluate(expr.expression)  
+
 
    def visit_unary_expr(self, expr: expressions.Unary):
       right = self.evaluate(expr.right)
@@ -174,22 +224,21 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       ## Unreachable
       return None
 
+
    def visit_variable_expr(self,expr:expressions.Variable):
-      #return self.ent.get(expr.name)
       return self.lookUpVariable(expr.name,expr)
+   
    
    def lookUpVariable(self,name:Token,expr:expressions.Expr):
       try:
-         distance : int = self.locals[expr.name.valor]
+         if isinstance(expr,expressions.This):
+            distance : int = self.locals[expr.keyword]
+         else:
+            distance : int = self.locals[expr.name.valor]
          return self.ent.getAt(distance,name.valor)
       except (KeyError,RuntimeError):
          return self.ent.get(name)
-      '''
-      if distance is not None:
-         return self.ent.getAt(distance,name.valor) # enviroment?
-      else:
-         return self.ent.get(name) # globals? esto no funcionará
-      '''
+      
  
    def visit_binary_expr(self, expr: expressions.Binary):
       left = self.evaluate(expr.left)
@@ -227,7 +276,6 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
          case TokenType.STAR:
             self.check_number_operands(expr.operator,left,right)
             return float(left) * float(right)
-         
 
       ## Unreachable
       return None
@@ -235,6 +283,7 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
    def visit_call_expr(self, expr: expressions.Call):
       from LoxCallable import LoxCallable # Inside import
       from LoxFunction import LoxFunction
+      from LoxClass import LoxClass
       callee : any = self.evaluate(expr.callee)
 
       arguments : List[any] = []
@@ -248,11 +297,20 @@ class Interprete(expressions.ExprVisitor,statements.StmtVisitor):
       if isinstance(callee, LoxFunction):
          function = callee
       else:
-         function = cast(LoxCallable, callee)
+         function = callee
       if len(arguments) is not function.arity():
          raise RuntimeError(expr.paren,"Expected "+function.arity()+
          " arguments but got "+len(arguments)+".")
 
+      #if isinstance(function,LoxClass): return function.call(self,arguments)
       return function.call(self,arguments,self.ent)
+   
+   def visit_get_expr(self, expr:expressions.Get):
+      from LoxInstance import LoxInstance
+      obj = self.evaluate(expr.object)
+      if isinstance(obj,LoxInstance):
+         return obj.get(expr.name)
+      
+      raise RuntimeError(expr.name,"Only instances have properties.")
 
          

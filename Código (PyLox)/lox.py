@@ -8,7 +8,7 @@ from parser import Parser
 from lexer import Lexer
 from Interprete import Interprete,LoxRuntimeError
 from Token import Token,TokenType
-import AstPrinter
+from AstPrinter import AstPrinter
 from Resolver import Resolver
 
 class Lox:
@@ -31,13 +31,16 @@ class Lox:
 
         pars = Parser(tokens)
         stmts = pars.parse()
-                    
+        
+        #printer = AstPrinter()
+        #print(printer.print_extended(stmts))  
+                          
         res = Resolver(inter)
         res.resolve(statements=stmts)
         if self.hadError:
             return
         
-        inter.interpret(stmts)
+        return inter.interpret(stmts)
     
 
     def runFile(self, path:str):
@@ -46,9 +49,9 @@ class Lox:
             data = archivo.read()
         self.run(data,inter)
 
-        if Lox.hadError:
+        if self.hadError:
             exit(65)
-        if Lox.hadRuntimeError:
+        if self.hadRuntimeError:
             exit(70)
 
         self.hadError = False
@@ -61,23 +64,24 @@ class Lox:
             if line == None:
                 return
             else:
-                Lox.run(line,inter)
+                self.run(line,inter)
 
-        Lox.hadError = false
+        self.hadError = false
 
 def main(args):
     a = Lox()
-    a.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_func6.lox')
+    
+    a.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_0.lox')
     '''
     if len(args) > 1:
         print("Usage: jlox [script]")
         exit(65)
         
     elif len(args) == 1:
-        Lox.runFile(args[0])
-
+        a.runFile(args[0])
+        
     else:
-        Lox.runPrompt()
+        a.runPrompt()
     '''
-main(argv[1:])
+#main(argv[1:])
 

@@ -8,13 +8,12 @@ class TestLexer(unittest.TestCase):
     def test_singleChars(self):
         a = lexer.Lexer('{ / *')
         b = str(a.extrae_tokens())
-        #print("----------- ",b)
         assert b == '''[Token(0,TokenType.LEFT_BRACE,"{"), Token(0,TokenType.SLASH,"/"), Token(0,TokenType.STAR,"*"), Token(0,TokenType.EOF,"")]'''
 
     def test_addition(self):
         a = lexer.Lexer('1+1')
         b = str(a.extrae_tokens())
-        assert b == '''[Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.EOF,"")]'''
+        assert b == '''[Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.PLUS,"+"), Token(0,TokenType.NUMBER,"1.0"), Token(0,TokenType.NUMBER,"1"), Token(0,TokenType.EOF,"")]'''
 
     def test_multiChars(self):
         a = lexer.Lexer('== > !=')

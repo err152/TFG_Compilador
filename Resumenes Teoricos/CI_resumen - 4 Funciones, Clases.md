@@ -213,9 +213,11 @@ Veamos de que sirve el Resolver. Cada vez que se visita una variable, comunica a
 
 Se modifica visit_var_expr() para que llame a una nueva función lookUpVariable() que comprueba en *locals* la distancia de la expresion que se va a tratar. Si la distancia no es nula llama a una nueva función del entorno llamada getAt(), de lo contrario toma el valor de *globals*.
 
-En este momento se vuelve a desviar el contenido respecto del libro. En este caso, la función getAt() recibe una lista de distancias y un nombre de variable, para cada distancia: si esta es 0 se busca la variable de dicho nombre en values y en el último entorno del stack; en caso de no ser 0 la distancia, se busca la variable dentro del entorno situado en esa posición; si ninguna de estas búsquedas encuentra la variable y el entorno de clausura no es nulo se llama recursivamente a getAt() sobre este entorno de clausura con la misma lista de distancias; por último, si de ninguna de las maneras se encuentra la variable, se produce una excepción RuntimeError que el método lookUpVariable gestiona llamando al get() básico que buscará la variable en globals de forma normal.
+En este momento se vuelve a desviar el contenido respecto del libro. En este caso, la función getAt() recibe una lista de distancias y un nombre de variable. Primeramente llama a un método auxiliar el cual crea una lista de diccionarios en la que almacena los distintos entornos a los que se quiere acceder mediante las distancias. Luego, para cada diccionario busca la variable y si la encuentra la retorna. Si no la encuentra y el entorno de clausura no es nulo se llama recursivamente a getAt() sobre este entorno de clausura con la misma lista de distancias; por último, si de ninguna de las maneras se encuentra la variable, se produce una excepción RuntimeError que el método lookUpVariable gestiona llamando al get() básico que buscará la variable en globals de forma normal.
 
 De igual manera se hace con visit_assign_expr(), en este caso llamando a assignAt() que actúa de la misma manera que getAt() pero dando valor a las variables una vez las encuentra.
+
+Para estos 3 métodos nos hemos ceñido una vez más al principio DRY tratando de refactorizar el código todo lo posible para no repetir acciones. Se han utilizado operadores Walrus.
 
 Finalmente, se añade al programa principal la definición del resolver, y se hace una llamada a resolve() sobre el interprete antes de ser este otro ejecutado, para que en el momento en que se llame a interpret() tenga ya la lista con distancias para acceder a las variables de manera mucho más rápida. 
 
@@ -223,14 +225,20 @@ Finalmente, se añade al programa principal la definición del resolver, y se ha
 
 Se añade control de erores al Resolver para los casos en los que en un scope local se crean dos variables con un mismo nombre, y para prevenir llamadas return fuera de ningún scope.
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> clases
 ## 12. Clases
 
 Se podría terminar el Interprete aquí pero hoy en día muchos lenguajes de programación populares soportan la programación orientada a objetos. Añadirlo será un extra para darle cierta familiaridad a los usuarios.
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> clases
 #### 12.1. OOP y Clases
 
 Existen 3 caminos hacia la programación orientada a objetos: clases, prototipos y multimétodos. Las clases fueron las primeras en inventarse y son las más populares actualmente.
@@ -245,8 +253,11 @@ El principal objetivo de una clase es agrupar datos con el código que actúa so
 
 Ese sería un resumen muy general. Muchos lenguajes programados a objetos también implementan herencia para reutilizar el comportamiento entre clases, pero hasta aquí llegará este proyecto.
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> clases
 #### 12.2. Declaración de Clases
 
 Se comienza modificando la sintáxis. Cambian las reglas de nuestra gramática.
@@ -258,8 +269,11 @@ declaration    → classDecl
 
 classDecl      → "class" IDENTIFIER "{" function* "}" ;
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> clases
 En Lox las clases se definen mediante la palabra clave "class" seguida del nombre de la clase. En su cuerpo se definen los métodos al igual que las funciones pero sin ser precedidas de la palabra clave "fun".
 
 > class Breakfast {
@@ -271,8 +285,129 @@ En Lox las clases se definen mediante la palabra clave "class" seguida del nombr
 >   }
 > }
 
+<<<<<<< HEAD
 
 
 Se añade la regla classDecl al generador AST metaExpr. Esta guarda el nombre de la clase y los métodos en su cuerpo
 
 Se añade en el parser en la función declaration() la detección del token CLASS. También se añade una nueva función classDeclaration(). Esta función consume un token que corresponde al nombre, gestiona los corchetes que definen el cuerpo y crea una lista en la que guarda los métodos de la clase.
+=======
+Se añade la regla classDecl al generador AST metaExpr. Esta guarda el nombre de la clase y los métodos en su cuerpo
+
+Se añade en el parser en la función declaration() la detección del token CLASS. También se añade una nueva función classDeclaration(). Esta función consume un token que corresponde al nombre, gestiona los corchetes que definen el cuerpo y crea una lista en la que guarda los métodos de la clase.
+
+Se añade también un método visit_class_stmt tanto al resolver como al intérprete. En el resolver, declaramos y definimos la sentencia. En el intérprete,  definimos la sentencia en el entorno ent, creamos una clase LoxClass y asignamos esta clase a la sentencia.
+
+LoxClass es una nueva clase que creamos en el fichero LoxClass.py. En un principio esta clase tan solo contiene un constructor que inicializa el atributo nombre de la clase, y un método \_\_repr\_\_ para mostrar el nombre cuando la clase se tenga que mostrar.
+
+En este momento, se comprueba si se parsean bien las clases con un pequeño programa de prueba que define una clase con un método y fuera de la clase hace un print de la clase. Como resultado se obtiene el nombre de la clase, tal y como se espera.
+
+#### 12.3. Creando Instancias
+
+Lox no tiene métodos estáticos a los que llamar dentro de la propia clase, por lo que sin instancias las clases son inútiles. Para crear estas instancias se hace uso de las clases y las funciones de llamada, de forma que una instancia sea una llamada a las clases. 
+
+El primer paso es hacer que la clase LoxClass implemente LoxCallable y por ello definir las funciones call() y arity() heredadas. La función call() crea y retorna una instancia de la propia clase, mientras que arity() retorna directamente 0 ya que la llamada a la clase no recibe argumentos.
+
+Toca crear la clase LoxInstance en un nuevo fichero LoxInstance.py. De momento solo definimos un \_\_init\_\_ en el que inicializamos una clase como atributo, y un \_\_repr\_\_ que imprima el nombre de la clase seguido de " instance".
+
+Se comprueba que esto funciona creando otro fichero de prueba simpel que crea una clase vacía, inicializia una nueva variable con esta clase y hace un print de la variable.
+
+#### 12.4. Propiedades de las Instancias
+
+Cada instancia es una colección de valores nombrados. Los métodos tanto de dentro como de fuera de la clase pueden modificar los valores o propiedades de las clases. Si estas propiedades se acceden desde fuera se utiliza el carácter '.'. Este punto tiene la misma precedencia que el paréntesis de una llamada a una función por lo que se modifica la regla de llamada para incluirlo.
+
+call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
+
+###### 12.4.1. Expresiones Get
+
+Se añade un nodo al árbol sintáctico y se modifíca el parser para que en la función call() si detecta '.' cree una expression Get con el identificador que continua el punto.
+
+De igual manera se añade el método visit_get_expr tanto en el Resolver como en el Intérprete. Las propiedades no son resueltas ya que se visitan de forma dinámica. Por otro lado, en el intérprete se evalua la expresión y si el resultado es del tipo LoxInstance se trata de acceder a la propiedad, si no lo fuera se devuelve un error.
+
+Es momento de añadir estados a las instancias. Se crea un diccionario en LoxInstance que inicializamos vacío en el constructor.
+
+Definimos el método get mediante el que se accede a las propiedades de la instancia.
+
+###### 12.4.2. Expresiones Set
+
+Los setters tienen la misma sintáxis que los getters pero se situan en el lado izquierdo de la asignación. Por tanto, se modifica la regla de la gramática correspondiente a la asignación de la siguiente manera.
+
+assignment     → ( call "." )? IDENTIFIER "=" assignment
+               | logic_or ;
+
+A diferencia de los getters, los setters no encadenan. Si tengo una sentencia "libro.novela.genero = romance" solo ".genero" actúa como setter.
+
+Añadimos un nuevo nodo al generador AST.
+
+Para el parser hacemos lo siguiente. Parseamos la parte izquierda de la asignación como una expresión normal y en el momento en el que llegamos al símbolo de igualdad tomamos esta expresión ya parseada y la tranformamos en el nodo del árbol sintáctico correcto para la asignación.
+
+En el Resolver se añade visit_set_expr que resuelve el valor y el objeto a asignar.
+
+En el Intérprete se evalua el objeto cuya propiedad se va a modificar y se comprueba si es del tipo LoxInstance. Si no lo es se genera un error. Si lo es se evalua el valor que se va a asignar y se guarda en la instancia mediante un método set que añadimos a la clase LoxInstance para añadir propiedades y sus respectivos valores al diccionario fields.
+
+#### 12.5. Métodos en las Clases
+
+En este punto se pueden crear instancias de clases y almacenar datos en ellas, pero las clases en sí no hacen nada. Las instancias no son más que simples diccionarios. El siguiente paso es añadir métodos de comportamiento.
+
+En nuestra función visit_class_stmt del Resolver, añadimos un bucle que recorra los métodos de la clase, resolviendolos pasándole como argumento un nuevo valor del enumerado FunctionType 'METHOD'.
+
+Ahora se pasa a modificar el Intérprete. En la misma función visit_class_stmt recorremos de igual modo los métodos de la clase, esta vez creando un objeto LoxFunction para cada uno de los métodos y añadiéndolos a un diccionario methods que se pasará como parámetro en el momento de creación de la clase.
+
+Para que esto funcione se modifica LoxClass para recibir en el constructor este diccionario de funciones.
+
+Las clases guardan los métodos mientras que sus instancias guardan los atributos o propiedades. Pero aún así, se accede a estos métodos a partir de las instancias, por lo que se añade al método get de LoxInstance una búsqueda del método en cuestión en la clase que contiene como atributo mediante un nuevo método llamado findMethod. Este métod se crea en la clase LoxClass y no hace más que buscar en el diccionario methods un método específico.
+
+Se prueba que todo esto funciona nuevamente con otro pequeño programa de prueba prueba_clases3.lox.
+
+#### 12.6. This
+
+Lo siguiente es añadir una manera de acceder a las propiedades de la clase desde los métodos de esta, es decir el "this" de Java o el "self" de python.
+
+Se añade un nuevo nodo a la sintáxis y se modifica el método primary() del parser para reconocer la palabra clave this.
+
+En el resolver se crea un método visit_this_expr() que llama a resolveLocal(), pero this no es una variable que esté en el scope por lo que se modifica visit_class_stmt() para que despues de definir la variable, abra un nuevo scope y añada this a este, y antes de terminar cierre este nuevo scope.
+
+Se modifica en get() de LoxInstance la linea que retornaba el método si este estaba vacío para que devuelva la llamada a bind(self) del método. La función bind() de LoxFunction crea un nuevo entorno en el que define "this" y retorna una función pasándole la declaración de la función y este nuevo entorno a su constructor.
+
+Por último se crea el método visit_this_expr en el Intérprete para que busca la variable.
+
+###### 12.6.1. Usos no válidos de This
+
+¿Qué ocurre si se intenta acceder a this fuera de un método? esto no debería poderse hacer, se tiene que resolver este problema.
+
+Para ello se crea un nuevo enumerado en el Resolver llamado ClassType que diferencia entre clases y no clases, y añadimos un atributo al resolver de este tipo inicializado a NONE. Este atributo lo cambiaremos a CLASS cuando se entra a visit_class_expr y se retornará a su estado previo antes de salir de este mismo método.
+
+En visit_this_expr ahora se comprobará el tipo de clase actual y en caso de no ser de tipo clase se generará un error.
+
+#### 12.7. Constructores e Inicializadores.
+
+La construcción de un objeto se puede separar en dos partes:
+
+- Se reserva espacio en memoria para la nueva instancia.
+
+- Se hace una llamada a un código que inicializa el objeto por formar.
+
+
+
+Toca crear el constructor de nuestras clases. Cuando una clase es llamada, justo despues de crear la nueva instancia se busca un método "init", utilizando el formato que sigue python para los constructores, y si se encuentra inmediatamente se vincula y se invoca pasandole la lista de argumentos.
+
+Ahora que la clase llama al constructor y esta puede recibir argumentos, se tiene que modificar el método de aridad de la clase que se tenía puesto a un valor fijo de 0.
+
+
+
+###### 12.7.1. Invocando init() directamente
+
+En caso de llamarse directamente al método init() de una clase ya inicializada se ha decidido retornar el valor this. Para esto se modifica LoxFunction para que en el método call compruebe antes de retornar un valor si la función es una función de inicialización, si lo es retorna this, si no lo es retorna el valor a devolver.
+
+La manera de comprobar si es una función de inicialización es crear un nuevo atributo booleano isInitializer que lo indique, y modificar el constructor de LoxFunction para recibir este booleano como argumento para su constructor.
+
+
+
+###### 12.7.2. Retornando de init()
+
+¿Qué pasaría si se tratase de retornar un valor en el constructor? Esto es algo que normalmente se trata de evitar ya que el constructor debe devolver el objeto creado.
+
+La solución a este problema es crear un nuevo FunctionType en el Resolver 'INITIALIZER', en visit_class_stmt cuando se comprueban los métodos si el nombre del método es "init" se declara la función bajo este nuevo tipo, y lanzar un error en visit_return_stmt si el tipo de la función a retornar es initializer. 
+
+Hecho esto todavía no se cubre el caso de hacer un return aislado en la inicialización. Esto se gestiona desde la función call de LoxFunction cuando se trata la excepción Return, si la función actual es inicializadora se busca this en el entorno de clausura. 
+>>>>>>> clases
