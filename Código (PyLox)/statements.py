@@ -55,11 +55,7 @@ class Block(Stmt):
        return visitor.visit_block_stmt(self)
 
 class Class(Stmt):
-<<<<<<< HEAD
-   def __init__(self,name:Token,methods:List['Function']):
-=======
    def __init__(self,name:Token,methods:List[Stmt]):
->>>>>>> clases
        self.name = name
        self.methods = methods
 

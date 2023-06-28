@@ -1,16 +1,43 @@
-IMPORTANTE:
-- Implementar Clases y documentarlas en la memoria.
-- Apartado 'más allá', 'conclusión', 'apéndices', 'testing' e 'introducción'
-- Revisar todos los demás apartados y pulirlos.
+APUNTES MEMORIA:
+# RESUMEN:
+- comentar a Domingo si cambiar el resumen.
+
+# INTRODUCCIÓN:
+- dejar claro que se explica todo de a poco y en orden, por estar enfocado el proyecto a ser utilizado en una materia.
+- añadir diagrama gantt cronología
+- preguntar Domingo fumbleada: analisis lexico, sintactico, semantico
+
+# DESARROLLO
+## TEXT SCANNING
+- (Domingo) checkear
+
+## TOKEN PARSING
+- Quizás sobre el meter código.
+- Meter ejemplo de lo que devuelve el Parser ¿?
+- (Domingo) checkear
+
+## EVALUACIÓN
+- No me convence, quizás tenga que meter alguna otra cosa o darle otro enfoque.
+
+## AÑADIENDO FUNCIONALIDADES
+- Control de flujo if, while, for
+- Funciones nativas, declaraciones, return, cierres locales
+- Resolución y vinculación
+- Clases instancias, this, init
+
+# TESTING
+- (Domingo) checkear
+
+# CONCLUSIÓN Y TRABAJO FUTURO
+- Añadir una conclusión
+- Añadir una reflexión del trabajo realizado
+- Comentar alternativas: ByteCoding, Transpilers
 
 TODO:
-- test unitarios de parser e interprete a ficheros como en la asignatura .out .try (realcionar con DRY en 
-memoria)
+- Recolocar las imagenes cuando esté terminada la memoria
 - Citar imagenes
-- completar lox run por terminal para que no ejecute solamente lineas si no que puedas escribir poco a poco un programa.
 - agregar de alguna manera sarabander Structure and Interpretation of computer
 - añadir grafos para que se entienda mejor la implementación (dreampuf digraph¿?)
-- apuntar por que hemos utilizado esta metodologia (cascada¿?) y no otra
 - vanilla programming
 - Explicar mensajes de Git commit
 - Comentar proyecto enfocado a dar un curso.

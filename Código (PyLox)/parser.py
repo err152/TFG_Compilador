@@ -192,19 +192,6 @@ class Parser:
             self.synchronize()
             return None
         
-<<<<<<< HEAD
-    def classDeclaration(self) -> Stmt:
-        name : Token = self.consume(TokenType.IDENTIFIER,"Expect class name.")
-        self.consume(TokenType.LEFT_BRACE,"Expect '{' before class body.")
-        
-        methods : List[statements.Function] = []
-        while not self.check(TokenType.RIGHT_BRACE) and not self.isAtEnd():
-            methods.add(self.function("method"))
-            
-        self.consume(TokenType.RIGHT_BRACE,"Expect '}' before class body.")
-        return statements.Class(name,methods)  
-=======
-        
     def classDeclaration(self) -> Stmt:
         name : Token = self.consume(TokenType.IDENTIFIER,"Expect class name.")
         self.consume(TokenType.LEFT_BRACE,"Expect '{' before class body.")
@@ -215,9 +202,7 @@ class Parser:
             
         self.consume(TokenType.RIGHT_BRACE,"Expect '}' before class body.")
         return statements.Class(name,methods)
-    
->>>>>>> clases
-        
+            
     def statement(self) -> Stmt:
         if self.match(TokenType.FOR):
             return self.forStatement()
@@ -412,10 +397,6 @@ class Parser:
             stmts.append(self.declaration())
 
         return stmts
-<<<<<<< HEAD
-=======
-    
->>>>>>> clases
 
 if __name__ == '__main__':
     #pars = Parser([Token(0,TokenType.STRING,"'Hola mundo'"),Token(0,TokenType.EOF,"")])
