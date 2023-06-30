@@ -71,7 +71,7 @@ class Lox:
 def main(args):
     a = Lox()
     
-    a.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_0.lox')
+    a.runFile('C:\\Users\\Eduardo\\Desktop\\Universidad\\2o Cuatri\\TFG_compilador\\Código (PyLox)\\pruebas\\prueba_func9.lox')
     '''
     if len(args) > 1:
         print("Usage: jlox [script]")
@@ -83,5 +83,5 @@ def main(args):
     else:
         a.runPrompt()
     '''
-#main(argv[1:])
+main(argv[1:])
 

@@ -1,46 +1,36 @@
 APUNTES MEMORIA:
 # RESUMEN:
-- comentar a Domingo si cambiar el resumen.
+- done
 
 # INTRODUCCIÓN:
-- dejar claro que se explica todo de a poco y en orden, por estar enfocado el proyecto a ser utilizado en una materia.
-- añadir diagrama gantt cronología
-- preguntar Domingo fumbleada: analisis lexico, sintactico, semantico
+- done
 
 # DESARROLLO
 ## TEXT SCANNING
-- (Domingo) checkear
+- done
 
 ## TOKEN PARSING
-- Quizás sobre el meter código.
-- Meter ejemplo de lo que devuelve el Parser ¿?
-- (Domingo) checkear
+- done
 
 ## EVALUACIÓN
-- No me convence, quizás tenga que meter alguna otra cosa o darle otro enfoque.
+- De momento, done.
 
 ## AÑADIENDO FUNCIONALIDADES
-- Control de flujo if, while, for
-- Funciones nativas, declaraciones, return, cierres locales
-- Resolución y vinculación
-- Clases instancias, this, init
+- done, quizás añadir alguna imágen del resolver values,stack,closure,get
 
 # TESTING
-- (Domingo) checkear
+- done
 
 # CONCLUSIÓN Y TRABAJO FUTURO
 - Añadir una conclusión
 - Añadir una reflexión del trabajo realizado
-- Comentar alternativas: ByteCoding, Transpilers
 
 TODO:
 - Recolocar las imagenes cuando esté terminada la memoria
-- Citar imagenes
-- agregar de alguna manera sarabander Structure and Interpretation of computer
-- añadir grafos para que se entienda mejor la implementación (dreampuf digraph¿?)
-- vanilla programming
-- Explicar mensajes de Git commit
-- Comentar proyecto enfocado a dar un curso.
+- comillas: anglicismos solo primera vez
+- negrita y cursiva: destacar y cosas del código visit
+- conclusion: que problemas puede suponer para cuando se den en clases y recomendaciones
+- preguntar a la biblioteca por keywords para la memoria
 
 
 
